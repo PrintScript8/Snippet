@@ -7,6 +7,6 @@ on:
 
 jobs:
   call_workflow:
-    uses: PrintScript8/ingsis-library/blob/main/.github/workflows/on-pull-request.yml@main
+    uses: PrintScript8/ingsis-library/.github/workflows/on-pull-request.yml@main
     with:
       run_docker_compose: true
