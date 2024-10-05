@@ -26,5 +26,5 @@ fun main(args: Array<String>) {
     System.setProperty("spring.datasource.username", dbUser)
     System.setProperty("spring.datasource.password", dbPassword)
 
-    runApplication<SnippetApplication>(*args)
+    runApplication<SnippetApplication>(args.toString())
 }
