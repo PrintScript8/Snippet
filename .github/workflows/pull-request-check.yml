@@ -10,3 +10,6 @@ jobs:
     uses: PrintScript8/ingsis-library/.github/workflows/on-pull-request.yml@main
     with:
       run_docker_compose: true
+
+permissions:
+  contents: read
