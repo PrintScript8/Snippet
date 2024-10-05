@@ -1,8 +1,8 @@
 package austral.ingsis.snippet
 
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
@@ -15,11 +15,12 @@ class SnippetApplicationTests {
     private lateinit var context: ApplicationContext
 
     companion object {
-        private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withDatabaseName("test_db")
-            withUsername("test_user")
-            withPassword("test_password")
-        }
+        private val postgresContainer =
+            PostgreSQLContainer<Nothing>("postgres:14").apply {
+                withDatabaseName("test_db")
+                withUsername("test_user")
+                withPassword("test_password")
+            }
 
         @BeforeAll
         @JvmStatic
