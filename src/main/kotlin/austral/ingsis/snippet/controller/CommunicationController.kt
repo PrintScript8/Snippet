@@ -11,7 +11,10 @@ class CommunicationController {
 
     @GetMapping("/testRequestMessage")
     fun callEndpoint(): ResponseEntity<String> {
-        return ResponseEntity.ok(testClient.get().uri("/testRespondMessage").retrieve().toEntity(String::class.java).body)
+        return ResponseEntity.ok(testClient.get()
+            .uri("/testRespondMessage")
+            .retrieve()
+            .toEntity(String::class.java).body)
     }
 
     @GetMapping("/testRespondMessage")
