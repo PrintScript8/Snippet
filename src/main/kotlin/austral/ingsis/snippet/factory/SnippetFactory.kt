@@ -5,7 +5,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class SnippetFactory {
-    fun createSnippet(name: String, creationDate: String): Snippet {
+    fun createSnippet(
+        name: String,
+        creationDate: String,
+    ): Snippet {
         return Snippet(name = name, creationDate = creationDate)
     }
 }

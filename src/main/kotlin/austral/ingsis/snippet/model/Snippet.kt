@@ -11,8 +11,7 @@ data class Snippet(
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long = 0,
     val name: String,
-    val creationDate: String
-)
-{
+    val creationDate: String,
+) {
     constructor() : this(0, "", "")
 }

@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service
 @Service
 class SnippetService(
     @Autowired private val snippetRepository: SnippetRepositoryInterface,
-    @Autowired private val snippetFactory: SnippetFactory
+    @Autowired private val snippetFactory: SnippetFactory,
 ) {
-
-    fun createSnippet(name: String, creationDate: String): Snippet {
+    fun createSnippet(
+        name: String,
+        creationDate: String,
+    ): Snippet {
         val snippet = snippetFactory.createSnippet(name, creationDate)
         return snippetRepository.save(snippet)
     }
@@ -25,7 +27,11 @@ class SnippetService(
         return snippetRepository.findById(id).orElse(null)
     }
 
-    fun updateSnippet(id: Long, name: String, creationDate: String): Snippet? {
+    fun updateSnippet(
+        id: Long,
+        name: String,
+        creationDate: String,
+    ): Snippet? {
         val snippet = snippetRepository.findById(id).orElse(null) ?: return null
         val updatedSnippet = snippet.copy(name = name, creationDate = creationDate)
         return snippetRepository.save(updatedSnippet)

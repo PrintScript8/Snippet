@@ -8,12 +8,11 @@ import kotlin.test.assertNotNull
 
 @SpringBootTest
 class SnippetApplicationTests {
-	@Autowired
-	private lateinit var context: ApplicationContext
+    @Autowired
+    private lateinit var context: ApplicationContext
 
-	@Test
-	fun contextLoads() {
-		assertNotNull(context, "The application context should have loaded.")
-	}
-
+    @Test
+    fun contextLoads() {
+        assertNotNull(context, "The application context should have loaded.")
+    }
 }
