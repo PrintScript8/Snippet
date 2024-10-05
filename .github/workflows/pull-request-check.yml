@@ -8,5 +8,5 @@ on:
 jobs:
   call_workflow:
     uses: ezequielrickert/ingsis-library/.github/workflows/on-pull-request.yml@main
-#    with:
-#      run_docker_compose: true
+    with:
+      run_docker_compose: true
