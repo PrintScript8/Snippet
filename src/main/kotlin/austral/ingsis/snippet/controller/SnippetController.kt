@@ -3,6 +3,8 @@ package austral.ingsis.snippet.controller
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.service.SnippetService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,8 +22,9 @@ class SnippetController(
     @PostMapping
     fun createSnippet(
         @RequestBody snippet: Snippet,
-    ): Snippet {
-        return snippetService.createSnippet(snippet.name, snippet.creationDate)
+    ): ResponseEntity<Snippet> {
+        val createdSnippet = snippetService.createSnippet(snippet.name, snippet.creationDate)
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet) // Retorna 201
     }
 
     @GetMapping
@@ -46,7 +49,8 @@ class SnippetController(
     @DeleteMapping("/{id}")
     fun deleteSnippet(
         @PathVariable id: Long,
-    ) {
+    ): ResponseEntity<Void> {
         snippetService.deleteSnippet(id)
+        return ResponseEntity.noContent().build() // Retorna 204
     }
 }
