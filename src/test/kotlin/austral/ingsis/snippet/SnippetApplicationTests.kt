@@ -27,13 +27,11 @@ class SnippetApplicationTests {
                 withDatabaseName(dbName)
                 withUsername(dbUser)
                 withPassword(dbPassword)
-                withStartupAttempts(5)
             }
 
         @BeforeAll
         @JvmStatic
         fun startContainer() {
-            println("DB_NAME: $dbName, DB_USER: $dbUser")
             postgresContainer.start()
             System.setProperty("spring.datasource.url", postgresContainer.jdbcUrl)
             System.setProperty("spring.datasource.username", postgresContainer.username)
