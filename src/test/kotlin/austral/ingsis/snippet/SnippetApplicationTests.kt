@@ -2,11 +2,13 @@ package austral.ingsis.snippet
 
 import io.github.cdimascio.dotenv.Dotenv
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.testcontainers.containers.PostgreSQLContainer
+import kotlin.test.Test
 
 @SpringBootTest
 class SnippetApplicationTests {
@@ -43,10 +45,10 @@ class SnippetApplicationTests {
         }
     }
 
-//    @Test
-//    fun contextLoads() {
-//        assertNotNull(context, "The application context should have loaded.")
-//    }
+    @Test
+    fun contextLoads() {
+        assertNotNull(context, "The application context should have loaded.")
+    }
 //
 //    @Test
 //    fun `run main method`() {
