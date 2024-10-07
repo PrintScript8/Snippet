@@ -35,9 +35,9 @@ class SnippetApplicationTests {
         @JvmStatic
         fun startContainer() {
             postgresContainer.start()
-//            System.setProperty("spring.datasource.url", postgresContainer.jdbcUrl)
-//            System.setProperty("spring.datasource.username", postgresContainer.username)
-//            System.setProperty("spring.datasource.password", postgresContainer.password)
+            System.setProperty("spring.datasource.url", postgresContainer.jdbcUrl)
+            System.setProperty("spring.datasource.username", postgresContainer.username)
+            System.setProperty("spring.datasource.password", postgresContainer.password)
         }
 
         @AfterAll
