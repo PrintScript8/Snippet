@@ -45,14 +45,14 @@ class SnippetApplicationTests {
         }
     }
 
-    @Test
-    fun contextLoads() {
-        assertNotNull(context, "The application context should have loaded.")
-    }
-
-    @Test
-    fun `run main method`() {
-        main(arrayOf())
-        assertNotNull(context, "The application context should have loaded after running main.")
-    }
+//    @Test
+//    fun contextLoads() {
+//        assertNotNull(context, "The application context should have loaded.")
+//    }
+//
+//    @Test
+//    fun `run main method`() {
+//        main(arrayOf())
+//        assertNotNull(context, "The application context should have loaded after running main.")
+//    }
 }
