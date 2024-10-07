@@ -27,6 +27,7 @@ class SnippetApplicationTests {
                 withDatabaseName(dbName)
                 withUsername(dbUser)
                 withPassword(dbPassword)
+                withStartupAttempts(5)
             }
 
         @BeforeAll
