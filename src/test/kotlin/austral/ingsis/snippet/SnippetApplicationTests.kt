@@ -1,5 +1,6 @@
 package austral.ingsis.snippet
 
+import io.github.cdimascio.dotenv.Dotenv
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -15,18 +16,25 @@ class SnippetApplicationTests {
     private lateinit var context: ApplicationContext
 
     companion object {
+        val dotenv = Dotenv.load()
+
+        val dbPassword = dotenv["DB_PASSWORD"]
+        val dbName = dotenv["DB_NAME"]
+        val dbUser = dotenv["DB_USER"]
+        val dbPort = dotenv["DB_PORT"]
+
         private val postgresContainer =
             PostgreSQLContainer<Nothing>("postgres:14").apply {
-                withDatabaseName("test_db")
-                withUsername("test_user")
-                withPassword("test_password")
+                withDatabaseName(dbName)
+                withUsername(dbUser)
+                withPassword(dbPassword)
+                withExposedPorts(dbPort.toInt())
             }
 
         @BeforeAll
         @JvmStatic
         fun startContainer() {
             postgresContainer.start()
-            // Override the Spring datasource properties to point to the test container
             System.setProperty("spring.datasource.url", postgresContainer.jdbcUrl)
             System.setProperty("spring.datasource.username", postgresContainer.username)
             System.setProperty("spring.datasource.password", postgresContainer.password)
@@ -42,5 +50,11 @@ class SnippetApplicationTests {
     @Test
     fun contextLoads() {
         assertNotNull(context, "The application context should have loaded.")
+    }
+
+    @Test
+    fun `run main method`() {
+        main(arrayOf())
+        assertNotNull(context, "The application context should have loaded after running main.")
     }
 }

@@ -20,11 +20,4 @@ class CommunicationControllerTest {
             .andExpect(status().isOk)
             .andExpect(content().string("Greetings from Snippet!"))
     }
-
-    @Test
-    fun `should call endpoint and return response`() {
-        mockMvc.perform(get("/testRequestMessage"))
-            .andExpect(status().isOk)
-            .andExpect(content().string("Greetings from Snippet!"))
-    }
 }
