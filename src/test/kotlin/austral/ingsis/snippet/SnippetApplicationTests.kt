@@ -16,19 +16,17 @@ class SnippetApplicationTests {
     private lateinit var context: ApplicationContext
 
     companion object {
-        val dotenv = Dotenv.load()
+        private val dotenv = Dotenv.load()
 
-        val dbPassword = dotenv["DB_PASSWORD"]
-        val dbName = dotenv["DB_NAME"]
-        val dbUser = dotenv["DB_USER"]
-        val dbPort = dotenv["DB_PORT"]
+        private val dbPassword = dotenv["DB_PASSWORD"]
+        private val dbName = dotenv["DB_NAME"]
+        private val dbUser = dotenv["DB_USER"]
 
         private val postgresContainer =
             PostgreSQLContainer<Nothing>("postgres:14").apply {
                 withDatabaseName(dbName)
                 withUsername(dbUser)
                 withPassword(dbPassword)
-                withExposedPorts(dbPort.toInt())
             }
 
         @BeforeAll
