@@ -3,12 +3,10 @@ package austral.ingsis.snippet
 import io.github.cdimascio.dotenv.Dotenv
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.testcontainers.containers.PostgreSQLContainer
-import kotlin.test.assertNotNull
 
 @SpringBootTest
 class SnippetApplicationTests {
