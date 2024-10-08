@@ -7,8 +7,21 @@ import org.springframework.stereotype.Component
 class SnippetFactory {
     fun createSnippet(
         name: String,
-        creationDate: String,
+        description: String,
+        code: String,
+        languageId: Long,
+        ownerId: Long,
+        usersWithReadPermission: List<Long> = emptyList(),
+        usersWithWritePermission: List<Long> = emptyList()
     ): Snippet {
-        return Snippet(name = name, creationDate = creationDate)
+        return Snippet(
+            name = name,
+            description = description,
+            code = code,
+            languageId = languageId,
+            ownerId = ownerId,
+            usersWithReadPermission = usersWithReadPermission,
+            usersWithWritePermission = usersWithWritePermission
+        )
     }
 }

@@ -12,14 +12,32 @@ class SnippetFactoryTest {
     fun `should create snippet`() {
         // Arrange
         val name = "Test Snippet"
-        val content = "Test Content"
+        val description = "Test Description"
+        val code = "Test Code"
+        val languageId = 1L
+        val ownerId = 1L
+        val usersWithReadPermission = listOf<Long>()
+        val usersWithWritePermission = listOf<Long>()
 
         // Act
-        val snippet = snippetFactory.createSnippet(name, content)
+        val snippet = snippetFactory.createSnippet(
+            name = name,
+            description = description,
+            code = code,
+            languageId = languageId,
+            ownerId = ownerId,
+            usersWithReadPermission = usersWithReadPermission,
+            usersWithWritePermission = usersWithWritePermission
+        )
 
         // Assert
         assertEquals(name, snippet.name)
-        assertEquals(content, snippet.creationDate)
+        assertEquals(description, snippet.description)
+        assertEquals(code, snippet.code)
+        assertEquals(languageId, snippet.languageId)
+        assertEquals(ownerId, snippet.ownerId)
+        assertEquals(usersWithReadPermission, snippet.usersWithReadPermission)
+        assertEquals(usersWithWritePermission, snippet.usersWithWritePermission)
     }
 
     @Test
@@ -27,10 +45,20 @@ class SnippetFactoryTest {
         val emptySnippet = Snippet()
 
         val expectedName = ""
-        val expectedContent = ""
+        val expectedDescription = ""
+        val expectedCode = ""
+        val expectedLanguageId = 0L
+        val expectedOwnerId = 0L
+        val expectedUsersWithReadPermission = emptyList<Long>()
+        val expectedUsersWithWritePermission = emptyList<Long>()
 
         // Assert
         assertEquals(expectedName, emptySnippet.name)
-        assertEquals(expectedContent, emptySnippet.creationDate)
+        assertEquals(expectedDescription, emptySnippet.description)
+        assertEquals(expectedCode, emptySnippet.code)
+        assertEquals(expectedLanguageId, emptySnippet.languageId)
+        assertEquals(expectedOwnerId, emptySnippet.ownerId)
+        assertEquals(expectedUsersWithReadPermission, emptySnippet.usersWithReadPermission)
+        assertEquals(expectedUsersWithWritePermission, emptySnippet.usersWithWritePermission)
     }
 }
