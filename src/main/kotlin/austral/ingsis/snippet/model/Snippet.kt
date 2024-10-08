@@ -15,3 +15,15 @@ data class Snippet(
 ) {
     constructor() : this(0, "", "")
 }
+
+/**
+ * toAdd
+ * Snippet:
+ * - Nombre
+ * - Descripcion
+ * - Codigo
+ * - Lenguaje
+ * - Owner
+ * - Usuarios con permiso de lectura
+ * - Usuarios con permiso de escritura
+ */
