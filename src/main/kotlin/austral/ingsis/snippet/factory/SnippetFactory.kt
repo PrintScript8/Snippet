@@ -11,8 +11,6 @@ class SnippetFactory {
         code: String,
         languageId: Long,
         ownerId: Long,
-        usersWithReadPermission: List<Long> = emptyList(),
-        usersWithWritePermission: List<Long> = emptyList()
     ): Snippet {
         return Snippet(
             name = name,
@@ -20,8 +18,6 @@ class SnippetFactory {
             code = code,
             languageId = languageId,
             ownerId = ownerId,
-            usersWithReadPermission = usersWithReadPermission,
-            usersWithWritePermission = usersWithWritePermission
         )
     }
 }

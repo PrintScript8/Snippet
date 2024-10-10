@@ -18,8 +18,17 @@ class SnippetServiceTest {
     @Test
     fun `should return all snippets`() {
         // Arrange
-        val snippets = listOf(Snippet(1, "First Snippet", "Description",
-            "Code", 1L, 1L))
+        val snippets =
+            listOf(
+                Snippet(
+                    1,
+                    "First Snippet",
+                    "Description",
+                    "Code",
+                    1L,
+                    1L,
+                ),
+            )
         every { snippetRepository.findAll() } returns snippets
 
         // Act
@@ -33,8 +42,15 @@ class SnippetServiceTest {
     @Test
     fun `should return snippet by id`() {
         // Arrange
-        val snippet = Snippet(1, "First Snippet", "Description",
-            "Code", 1L, 1L)
+        val snippet =
+            Snippet(
+                1,
+                "First Snippet",
+                "Description",
+                "Code",
+                1L,
+                1L,
+            )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(snippet)
 
         // Act
@@ -49,18 +65,38 @@ class SnippetServiceTest {
     fun `should create new snippet`() {
         // Arrange
         val newSnippet = Snippet(2, "New Snippet", "Description", "Code", 1L, 1L)
-        every { snippetFactory.createSnippet("New Snippet", "Description",
-            "Code", 1L, 1L, emptyList(), emptyList()) } returns newSnippet
+        every {
+            snippetFactory.createSnippet(
+                "New Snippet",
+                "Description",
+                "Code",
+                1L,
+                1L,
+            )
+        } returns newSnippet
         every { snippetRepository.save(newSnippet) } returns newSnippet
 
         // Act
-        val result = snippetService.createSnippet("New Snippet", "Description",
-            "Code", 1L, 1L)
+        val result =
+            snippetService.createSnippet(
+                "New Snippet",
+                "Description",
+                "Code",
+                1L,
+                1L,
+            )
 
         // Assert
         assertEquals(newSnippet, result)
-        verify(exactly = 1) { snippetFactory.createSnippet("New Snippet", "Description",
-            "Code", 1L, 1L, emptyList(), emptyList()) }
+        verify(exactly = 1) {
+            snippetFactory.createSnippet(
+                "New Snippet",
+                "Description",
+                "Code",
+                1L,
+                1L,
+            )
+        }
         verify(exactly = 1) { snippetRepository.save(newSnippet) }
     }
 
@@ -79,16 +115,37 @@ class SnippetServiceTest {
     @Test
     fun `should update snippet`() {
         // Arrange
-        val existingSnippet = Snippet(1, "Old Snippet", "Old Description",
-            "Old Code", 1L, 1L)
-        val updatedSnippet = Snippet(1, "Updated Snippet", "Updated Description",
-            "Updated Code", 1L, 1L)
+        val existingSnippet =
+            Snippet(
+                1,
+                "Old Snippet",
+                "Old Description",
+                "Old Code",
+                1L,
+                1L,
+            )
+        val updatedSnippet =
+            Snippet(
+                1,
+                "Updated Snippet",
+                "Updated Description",
+                "Updated Code",
+                1L,
+                1L,
+            )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(existingSnippet)
         every { snippetRepository.save(any()) } returns updatedSnippet
 
         // Act
-        val result = snippetService.updateSnippet(1, "Updated Snippet", "Updated Description",
-            "Updated Code", 1L, 1L)
+        val result =
+            snippetService.updateSnippet(
+                1,
+                "Updated Snippet",
+                "Updated Description",
+                "Updated Code",
+                1L,
+                1L,
+            )
 
         // Assert
         assertEquals(updatedSnippet, result)
@@ -102,8 +159,15 @@ class SnippetServiceTest {
         every { snippetRepository.findById(1) } returns java.util.Optional.empty()
 
         // Act
-        val result = snippetService.updateSnippet(1, "Updated Snippet", "Updated Description",
-            "Updated Code", 1L, 1L)
+        val result =
+            snippetService.updateSnippet(
+                1,
+                "Updated Snippet",
+                "Updated Description",
+                "Updated Code",
+                1L,
+                1L,
+            )
 
         // Assert
         assertEquals(null, result)

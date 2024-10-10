@@ -23,8 +23,14 @@ class SnippetController(
     fun createSnippet(
         @RequestBody snippet: Snippet,
     ): ResponseEntity<Snippet> {
-        val createdSnippet = snippetService.createSnippet(snippet.name,
-            snippet.description, snippet.code, snippet.languageId, snippet.ownerId)
+        val createdSnippet =
+            snippetService.createSnippet(
+                snippet.name,
+                snippet.description,
+                snippet.code,
+                snippet.languageId,
+                snippet.ownerId,
+            )
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
     }
 
@@ -43,10 +49,16 @@ class SnippetController(
     @PutMapping("/{id}")
     fun updateSnippet(
         @RequestBody snippet: Snippet,
-        @PathVariable id: Long
+        @PathVariable id: Long,
     ): Snippet? {
-        return snippetService.updateSnippet( id, snippet.name, snippet.description, snippet.code,
-            snippet.languageId, snippet.ownerId)
+        return snippetService.updateSnippet(
+            id,
+            snippet.name,
+            snippet.description,
+            snippet.code,
+            snippet.languageId,
+            snippet.ownerId,
+        )
     }
 
     @DeleteMapping("/{id}")

@@ -39,11 +39,14 @@ class SnippetService(
         ownerId: Long,
     ): Snippet? {
         val snippet = snippetRepository.findById(id).orElse(null) ?: return null
-        val updatedSnippet = snippet.copy(name = name,
-            description = description,
-            code = code,
-            languageId = languageId,
-            ownerId = ownerId)
+        val updatedSnippet =
+            snippet.copy(
+                name = name,
+                description = description,
+                code = code,
+                languageId = languageId,
+                ownerId = ownerId,
+            )
         return snippetRepository.save(updatedSnippet)
     }
 

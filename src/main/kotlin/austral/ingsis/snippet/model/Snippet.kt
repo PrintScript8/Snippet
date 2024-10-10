@@ -1,6 +1,5 @@
 package austral.ingsis.snippet.model
 
-import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -16,10 +15,6 @@ data class Snippet(
     val code: String,
     val languageId: Long,
     val ownerId: Long,
-    @ElementCollection
-    val usersWithReadPermission: List<Long> = emptyList(),
-    @ElementCollection
-    val usersWithWritePermission: List<Long> = emptyList()
 ) {
-    constructor() : this(0, "", "", "", 0, 0, emptyList(), emptyList())
+    constructor() : this(0, "", "", "", 0, 0)
 }

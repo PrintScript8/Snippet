@@ -30,8 +30,17 @@ class SnippetControllerTest {
     @Test
     fun `should return all snippets`() {
         // Arrange - Mock the service to return a list of snippets
-        val snippets = listOf(Snippet(1, "First Snippet", "Description",
-            "Code", 1L, 1L))
+        val snippets =
+            listOf(
+                Snippet(
+                    1,
+                    "First Snippet",
+                    "Description",
+                    "Code",
+                    1L,
+                    1L,
+                ),
+            )
         every { snippetService.getAllSnippets() } returns snippets
 
         // Act - Make a GET request to /snippets
@@ -47,8 +56,15 @@ class SnippetControllerTest {
     @Test
     fun `should return snippet by id`() {
         // Arrange - Mock the service to return a specific snippet
-        val snippet = Snippet(1, "First Snippet",
-            "Description", "Code", 1L, 1L)
+        val snippet =
+            Snippet(
+                1,
+                "First Snippet",
+                "Description",
+                "Code",
+                1L,
+                1L,
+            )
         every { snippetService.getSnippetById(1) } returns snippet
 
         // Act - Make a GET request to /snippets/1
@@ -64,14 +80,23 @@ class SnippetControllerTest {
     @Test
     fun `should create new snippet`() {
         // Arrange - Mock the service to create a snippet
-        val newSnippet = Snippet(2, "New Snippet",
-            "Description", "Code", 1L, 1L)
+        val newSnippet =
+            Snippet(
+                2,
+                "New Snippet",
+                "Description",
+                "Code",
+                1L,
+                1L,
+            )
         every { snippetService.createSnippet(any(), any(), any(), any(), any()) } returns newSnippet
 
         // Act - Make a POST request to /snippets
-        val jsonSnippet = """{ "name": "New Snippet", "description": "Description", "code": "Code",
+        val jsonSnippet =
+            """{ "name": "New Snippet", "description": "Description", "code": "Code",
             | "languageId": 1, "ownerId": 1, "usersWithReadPermission": [],
-            |  "usersWithWritePermission": [] }""".trimMargin()
+            |  "usersWithWritePermission": [] }
+            """.trimMargin()
         mockMvc.perform(
             post("/snippets")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -100,18 +125,42 @@ class SnippetControllerTest {
     @Test
     fun `should update snippet`() {
         // Arrange - Mock the service to return an existing snippet and then an updated snippet
-        val existingSnippet = Snippet(1, "Old Snippet", "Old Description",
-            "Old Code", 1L, 1L)
-        val updatedSnippet = Snippet(1, "Updated Snippet", "Updated Description",
-            "Updated Code", 1L, 1L)
+        val existingSnippet =
+            Snippet(
+                1,
+                "Old Snippet",
+                "Old Description",
+                "Old Code",
+                1L,
+                1L,
+            )
+        val updatedSnippet =
+            Snippet(
+                1,
+                "Updated Snippet",
+                "Updated Description",
+                "Updated Code",
+                1L,
+                1L,
+            )
         every { snippetService.getSnippetById(1) } returns existingSnippet
-        every { snippetService.updateSnippet(1, "Updated Snippet", "Updated Description",
-            "Updated Code", 1L, 1L) } returns updatedSnippet
+        every {
+            snippetService.updateSnippet(
+                1,
+                "Updated Snippet",
+                "Updated Description",
+                "Updated Code",
+                1L,
+                1L,
+            )
+        } returns updatedSnippet
 
         // Act - Make a PUT request to /snippets/1
-        val jsonSnippet = """{"id": "1", "name": "Updated Snippet", "description": "Updated Description",
+        val jsonSnippet =
+            """{"id": "1", "name": "Updated Snippet", "description": "Updated Description",
             | "code": "Updated Code", "languageId": 1, "ownerId": 1, 
-            | "usersWithReadPermission": [], "usersWithWritePermission": [] }""".trimMargin()
+            | "usersWithReadPermission": [], "usersWithWritePermission": [] }
+            """.trimMargin()
         mockMvc.perform(
             put("/snippets/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -123,8 +172,15 @@ class SnippetControllerTest {
             .andExpect(jsonPath("$.code").value("Updated Code"))
 
         // Assert - Verify the service method was called
-        verify(exactly = 1) { snippetService.updateSnippet(
-            1, "Updated Snippet", "Updated Description",
-            "Updated Code", 1L, 1L) }
+        verify(exactly = 1) {
+            snippetService.updateSnippet(
+                1,
+                "Updated Snippet",
+                "Updated Description",
+                "Updated Code",
+                1L,
+                1L,
+            )
+        }
     }
 }

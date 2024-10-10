@@ -16,19 +16,16 @@ class SnippetFactoryTest {
         val code = "Test Code"
         val languageId = 1L
         val ownerId = 1L
-        val usersWithReadPermission = listOf<Long>()
-        val usersWithWritePermission = listOf<Long>()
 
         // Act
-        val snippet = snippetFactory.createSnippet(
-            name = name,
-            description = description,
-            code = code,
-            languageId = languageId,
-            ownerId = ownerId,
-            usersWithReadPermission = usersWithReadPermission,
-            usersWithWritePermission = usersWithWritePermission
-        )
+        val snippet =
+            snippetFactory.createSnippet(
+                name = name,
+                description = description,
+                code = code,
+                languageId = languageId,
+                ownerId = ownerId,
+            )
 
         // Assert
         assertEquals(name, snippet.name)
@@ -36,8 +33,6 @@ class SnippetFactoryTest {
         assertEquals(code, snippet.code)
         assertEquals(languageId, snippet.languageId)
         assertEquals(ownerId, snippet.ownerId)
-        assertEquals(usersWithReadPermission, snippet.usersWithReadPermission)
-        assertEquals(usersWithWritePermission, snippet.usersWithWritePermission)
     }
 
     @Test
@@ -49,8 +44,6 @@ class SnippetFactoryTest {
         val expectedCode = ""
         val expectedLanguageId = 0L
         val expectedOwnerId = 0L
-        val expectedUsersWithReadPermission = emptyList<Long>()
-        val expectedUsersWithWritePermission = emptyList<Long>()
 
         // Assert
         assertEquals(expectedName, emptySnippet.name)
@@ -58,7 +51,5 @@ class SnippetFactoryTest {
         assertEquals(expectedCode, emptySnippet.code)
         assertEquals(expectedLanguageId, emptySnippet.languageId)
         assertEquals(expectedOwnerId, emptySnippet.ownerId)
-        assertEquals(expectedUsersWithReadPermission, emptySnippet.usersWithReadPermission)
-        assertEquals(expectedUsersWithWritePermission, emptySnippet.usersWithWritePermission)
     }
 }
