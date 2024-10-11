@@ -13,8 +13,8 @@ data class Snippet(
     val name: String,
     val description: String,
     val code: String,
-    val languageId: Long,
+    val language: String,
     val ownerId: Long,
 ) {
-    constructor() : this(0, "", "", "", 0, 0)
+    constructor() : this(0, "", "", "", "", 0)
 }

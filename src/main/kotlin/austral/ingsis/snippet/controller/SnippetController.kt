@@ -28,7 +28,7 @@ class SnippetController(
                 snippet.name,
                 snippet.description,
                 snippet.code,
-                snippet.languageId,
+                snippet.language,
                 snippet.ownerId,
             )
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
@@ -56,7 +56,7 @@ class SnippetController(
             snippet.name,
             snippet.description,
             snippet.code,
-            snippet.languageId,
+            snippet.language,
             snippet.ownerId,
         )
     }

@@ -9,11 +9,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.springframework.web.client.RestTemplate
 
 class SnippetServiceTest {
     private val snippetRepository = mockk<SnippetRepositoryInterface>()
     private val snippetFactory = mockk<SnippetFactory>()
-    private val snippetService = SnippetService(snippetRepository, snippetFactory)
+    private val restTemplate = mockk<RestTemplate>()
+    private val snippetService = SnippetService(snippetRepository, snippetFactory, restTemplate)
 
     @Test
     fun `should return all snippets`() {
@@ -25,7 +27,7 @@ class SnippetServiceTest {
                     "First Snippet",
                     "Description",
                     "Code",
-                    1L,
+                    "python",
                     1L,
                 ),
             )
@@ -48,7 +50,7 @@ class SnippetServiceTest {
                 "First Snippet",
                 "Description",
                 "Code",
-                1L,
+                "python",
                 1L,
             )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(snippet)
@@ -64,13 +66,13 @@ class SnippetServiceTest {
     @Test
     fun `should create new snippet`() {
         // Arrange
-        val newSnippet = Snippet(2, "New Snippet", "Description", "Code", 1L, 1L)
+        val newSnippet = Snippet(2, "New Snippet", "Description", "Code", "python", 1L)
         every {
             snippetFactory.createSnippet(
                 "New Snippet",
                 "Description",
                 "Code",
-                1L,
+                "python",
                 1L,
             )
         } returns newSnippet
@@ -82,7 +84,7 @@ class SnippetServiceTest {
                 "New Snippet",
                 "Description",
                 "Code",
-                1L,
+                "python",
                 1L,
             )
 
@@ -93,7 +95,7 @@ class SnippetServiceTest {
                 "New Snippet",
                 "Description",
                 "Code",
-                1L,
+                "python",
                 1L,
             )
         }
@@ -121,7 +123,7 @@ class SnippetServiceTest {
                 "Old Snippet",
                 "Old Description",
                 "Old Code",
-                1L,
+                "python",
                 1L,
             )
         val updatedSnippet =
@@ -130,7 +132,7 @@ class SnippetServiceTest {
                 "Updated Snippet",
                 "Updated Description",
                 "Updated Code",
-                1L,
+                "python",
                 1L,
             )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(existingSnippet)
@@ -143,7 +145,7 @@ class SnippetServiceTest {
                 "Updated Snippet",
                 "Updated Description",
                 "Updated Code",
-                1L,
+                "python",
                 1L,
             )
 
@@ -165,7 +167,7 @@ class SnippetServiceTest {
                 "Updated Snippet",
                 "Updated Description",
                 "Updated Code",
-                1L,
+                "python",
                 1L,
             )
 

@@ -14,7 +14,7 @@ class SnippetFactoryTest {
         val name = "Test Snippet"
         val description = "Test Description"
         val code = "Test Code"
-        val languageId = 1L
+        val language = "python"
         val ownerId = 1L
 
         // Act
@@ -23,7 +23,7 @@ class SnippetFactoryTest {
                 name = name,
                 description = description,
                 code = code,
-                languageId = languageId,
+                language = language,
                 ownerId = ownerId,
             )
 
@@ -31,7 +31,7 @@ class SnippetFactoryTest {
         assertEquals(name, snippet.name)
         assertEquals(description, snippet.description)
         assertEquals(code, snippet.code)
-        assertEquals(languageId, snippet.languageId)
+        assertEquals(language, snippet.language)
         assertEquals(ownerId, snippet.ownerId)
     }
 
@@ -42,14 +42,14 @@ class SnippetFactoryTest {
         val expectedName = ""
         val expectedDescription = ""
         val expectedCode = ""
-        val expectedLanguageId = 0L
+        val expectedLanguage = "python"
         val expectedOwnerId = 0L
 
         // Assert
         assertEquals(expectedName, emptySnippet.name)
         assertEquals(expectedDescription, emptySnippet.description)
         assertEquals(expectedCode, emptySnippet.code)
-        assertEquals(expectedLanguageId, emptySnippet.languageId)
+        assertEquals(expectedLanguage, emptySnippet.language)
         assertEquals(expectedOwnerId, emptySnippet.ownerId)
     }
 }

@@ -37,7 +37,7 @@ class SnippetControllerTest {
                     "First Snippet",
                     "Description",
                     "Code",
-                    1L,
+                    "python",
                     1L,
                 ),
             )
@@ -62,7 +62,7 @@ class SnippetControllerTest {
                 "First Snippet",
                 "Description",
                 "Code",
-                1L,
+                "python",
                 1L,
             )
         every { snippetService.getSnippetById(1) } returns snippet
@@ -86,7 +86,7 @@ class SnippetControllerTest {
                 "New Snippet",
                 "Description",
                 "Code",
-                1L,
+                "python",
                 1L,
             )
         every { snippetService.createSnippet(any(), any(), any(), any(), any()) } returns newSnippet
@@ -131,7 +131,7 @@ class SnippetControllerTest {
                 "Old Snippet",
                 "Old Description",
                 "Old Code",
-                1L,
+                "python",
                 1L,
             )
         val updatedSnippet =
@@ -140,7 +140,7 @@ class SnippetControllerTest {
                 "Updated Snippet",
                 "Updated Description",
                 "Updated Code",
-                1L,
+                "python",
                 1L,
             )
         every { snippetService.getSnippetById(1) } returns existingSnippet
@@ -150,7 +150,7 @@ class SnippetControllerTest {
                 "Updated Snippet",
                 "Updated Description",
                 "Updated Code",
-                1L,
+                "python",
                 1L,
             )
         } returns updatedSnippet
@@ -178,7 +178,7 @@ class SnippetControllerTest {
                 "Updated Snippet",
                 "Updated Description",
                 "Updated Code",
-                1L,
+                "python",
                 1L,
             )
         }

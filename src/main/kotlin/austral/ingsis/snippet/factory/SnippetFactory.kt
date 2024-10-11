@@ -9,14 +9,14 @@ class SnippetFactory {
         name: String,
         description: String,
         code: String,
-        languageId: Long,
+        language: String,
         ownerId: Long,
     ): Snippet {
         return Snippet(
             name = name,
             description = description,
             code = code,
-            languageId = languageId,
+            language = language,
             ownerId = ownerId,
         )
     }
