@@ -24,7 +24,7 @@ class SnippetService(
     ): Snippet {
         val snippet = snippetFactory.createSnippet(name, description, code, language, ownerId)
         try {
-            val url = "http://localhost:8081/validate"
+            val url = "http://localhost:8081/parser/validate"
             val requestBody = mapOf(
                 "code" to code,
                 "language" to language

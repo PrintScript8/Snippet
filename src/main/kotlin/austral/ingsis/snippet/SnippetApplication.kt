@@ -14,5 +14,5 @@ class SnippetApplication {
 }
 
 fun main(args: Array<String>) {
-    runApplication<SnippetApplication>(*args)
+    runApplication<SnippetApplication>(args.toString())
 }
