@@ -4,18 +4,18 @@ import austral.ingsis.snippet.factory.SnippetFactory
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.repository.SnippetRepositoryInterface
 import austral.ingsis.snippet.service.SnippetService
+import austral.ingsis.snippet.validator.SnippetValidator
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.springframework.web.client.RestTemplate
 
 class SnippetServiceTest {
     private val snippetRepository = mockk<SnippetRepositoryInterface>()
     private val snippetFactory = mockk<SnippetFactory>()
-    private val restTemplate = mockk<RestTemplate>()
-    private val snippetService = SnippetService(snippetRepository, snippetFactory, restTemplate)
+    private val snippetValidator = mockk<SnippetValidator>()
+    private val snippetService = SnippetService(snippetRepository, snippetFactory, snippetValidator)
 
     @Test
     fun `should return all snippets`() {
@@ -29,6 +29,7 @@ class SnippetServiceTest {
                     "Code",
                     "python",
                     1L,
+                    "{ \"identifier_format\": \"camel case\"}"
                 ),
             )
         every { snippetRepository.findAll() } returns snippets
@@ -52,6 +53,7 @@ class SnippetServiceTest {
                 "Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(snippet)
 
@@ -66,7 +68,7 @@ class SnippetServiceTest {
     @Test
     fun `should create new snippet`() {
         // Arrange
-        val newSnippet = Snippet(2, "New Snippet", "Description", "Code", "python", 1L)
+        val newSnippet = Snippet(2, "New Snippet", "Description", "Code", "python", 1L, "{ \"identifier_format\": \"camel case\"}")
         every {
             snippetFactory.createSnippet(
                 "New Snippet",
@@ -74,6 +76,7 @@ class SnippetServiceTest {
                 "Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         } returns newSnippet
         every { snippetRepository.save(newSnippet) } returns newSnippet
@@ -86,6 +89,7 @@ class SnippetServiceTest {
                 "Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
 
         // Assert
@@ -97,6 +101,7 @@ class SnippetServiceTest {
                 "Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         }
         verify(exactly = 1) { snippetRepository.save(newSnippet) }
@@ -125,6 +130,7 @@ class SnippetServiceTest {
                 "Old Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         val updatedSnippet =
             Snippet(
@@ -134,6 +140,7 @@ class SnippetServiceTest {
                 "Updated Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(existingSnippet)
         every { snippetRepository.save(any()) } returns updatedSnippet
@@ -147,6 +154,7 @@ class SnippetServiceTest {
                 "Updated Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
 
         // Assert
@@ -169,6 +177,7 @@ class SnippetServiceTest {
                 "Updated Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
 
         // Assert

@@ -23,15 +23,21 @@ class SnippetController(
     fun createSnippet(
         @RequestBody snippet: Snippet,
     ): ResponseEntity<Snippet> {
-        val createdSnippet =
-            snippetService.createSnippet(
-                snippet.name,
-                snippet.description,
-                snippet.code,
-                snippet.language,
-                snippet.ownerId,
-            )
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
+        try {
+            val createdSnippet =
+                snippetService.createSnippet(
+                    snippet.name,
+                    snippet.description,
+                    snippet.code,
+                    snippet.language,
+                    snippet.ownerId,
+                    snippet.config
+                )
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
+
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
+        }
     }
 
     @GetMapping
@@ -58,6 +64,7 @@ class SnippetController(
             snippet.code,
             snippet.language,
             snippet.ownerId,
+            snippet.config
         )
     }
 

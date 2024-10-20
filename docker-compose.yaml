@@ -1,5 +1,5 @@
 services:
-  app:
+  snippet-app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,6 +7,9 @@ services:
       - "8080:8080"
     depends_on:
       - db
+    env_file: .env
+    networks:
+      - snippet-searcher-network
 
   db:
     image: postgres:14
@@ -19,6 +22,12 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - snippet-searcher-network
 
 volumes:
   pgdata:
+
+networks:
+  snippet-searcher-network:
+    external: true

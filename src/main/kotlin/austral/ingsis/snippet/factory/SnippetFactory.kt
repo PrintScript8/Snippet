@@ -11,6 +11,7 @@ class SnippetFactory {
         code: String,
         language: String,
         ownerId: Long,
+        config: String,
     ): Snippet {
         return Snippet(
             name = name,
@@ -18,6 +19,7 @@ class SnippetFactory {
             code = code,
             language = language,
             ownerId = ownerId,
+            config = config,
         )
     }
 }

@@ -39,6 +39,7 @@ class SnippetControllerTest {
                     "Code",
                     "python",
                     1L,
+                    "{ \"identifier_format\": \"camel case\"}"
                 ),
             )
         every { snippetService.getAllSnippets() } returns snippets
@@ -64,6 +65,7 @@ class SnippetControllerTest {
                 "Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         every { snippetService.getSnippetById(1) } returns snippet
 
@@ -88,8 +90,9 @@ class SnippetControllerTest {
                 "Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
-        every { snippetService.createSnippet(any(), any(), any(), any(), any()) } returns newSnippet
+        every { snippetService.createSnippet(any(), any(), any(), any(), any(), any()) } returns newSnippet
 
         // Act - Make a POST request to /snippets
         val jsonSnippet =
@@ -106,7 +109,7 @@ class SnippetControllerTest {
             .andExpect(jsonPath("$.name").value("New Snippet"))
 
         // Assert - Verify the service method was called
-        verify(exactly = 1) { snippetService.createSnippet(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { snippetService.createSnippet(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -133,6 +136,7 @@ class SnippetControllerTest {
                 "Old Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         val updatedSnippet =
             Snippet(
@@ -142,6 +146,7 @@ class SnippetControllerTest {
                 "Updated Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         every { snippetService.getSnippetById(1) } returns existingSnippet
         every {
@@ -152,6 +157,7 @@ class SnippetControllerTest {
                 "Updated Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         } returns updatedSnippet
 
@@ -180,6 +186,7 @@ class SnippetControllerTest {
                 "Updated Code",
                 "python",
                 1L,
+                "{ \"identifier_format\": \"camel case\"}"
             )
         }
     }

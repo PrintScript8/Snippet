@@ -15,6 +15,7 @@ data class Snippet(
     val code: String,
     val language: String,
     val ownerId: Long,
+    val config: String,
 ) {
-    constructor() : this(0, "", "", "", "", 0)
+    constructor() : this(0, "", "", "", "", 0, "")
 }

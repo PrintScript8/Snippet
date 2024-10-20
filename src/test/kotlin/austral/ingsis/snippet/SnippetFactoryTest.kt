@@ -16,6 +16,7 @@ class SnippetFactoryTest {
         val code = "Test Code"
         val language = "python"
         val ownerId = 1L
+        val config = "{ \"identifier_format\": \"camel case\"}"
 
         // Act
         val snippet =
@@ -25,6 +26,7 @@ class SnippetFactoryTest {
                 code = code,
                 language = language,
                 ownerId = ownerId,
+                config = config,
             )
 
         // Assert
