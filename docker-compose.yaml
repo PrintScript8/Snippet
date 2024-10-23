@@ -20,8 +20,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    networks:
-      - snippet-searcher-network
 
 volumes:
   pgdata:
