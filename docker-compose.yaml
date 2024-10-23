@@ -1,5 +1,5 @@
 services:
-  app:
+  snippet-app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,6 +7,7 @@ services:
       - "8080:8080"
     depends_on:
       - db
+    env_file: .env
 
   db:
     image: postgres:14

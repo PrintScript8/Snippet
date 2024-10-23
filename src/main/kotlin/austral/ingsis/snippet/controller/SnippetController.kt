@@ -1,5 +1,6 @@
 package austral.ingsis.snippet.controller
 
+import austral.ingsis.snippet.exception.ServiceException
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.service.SnippetService
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,11 +21,24 @@ class SnippetController(
     @Autowired private val snippetService: SnippetService,
 ) {
     @PostMapping
+    @Suppress("SwallowedException")
     fun createSnippet(
         @RequestBody snippet: Snippet,
     ): ResponseEntity<Snippet> {
-        val createdSnippet = snippetService.createSnippet(snippet.name, snippet.creationDate)
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet) // Retorna 201
+        return try {
+            val createdSnippet =
+                snippetService.createSnippet(
+                    snippet.name,
+                    snippet.description,
+                    snippet.code,
+                    snippet.language,
+                    snippet.ownerId,
+                    snippet.config,
+                )
+            ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
+        } catch (e: ServiceException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
+        }
     }
 
     @GetMapping
@@ -42,8 +56,17 @@ class SnippetController(
     @PutMapping("/{id}")
     fun updateSnippet(
         @RequestBody snippet: Snippet,
+        @PathVariable id: Long,
     ): Snippet? {
-        return snippetService.updateSnippet(snippet.id, snippet.name, snippet.creationDate)
+        return snippetService.updateSnippet(
+            id,
+            snippet.name,
+            snippet.description,
+            snippet.code,
+            snippet.language,
+            snippet.ownerId,
+            snippet.config,
+        )
     }
 
     @DeleteMapping("/{id}")
