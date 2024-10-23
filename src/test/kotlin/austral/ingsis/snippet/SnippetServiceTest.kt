@@ -29,7 +29,7 @@ class SnippetServiceTest {
                     "Code",
                     "python",
                     1L,
-                    "{ \"identifier_format\": \"camel case\"}"
+                    "{ \"identifier_format\": \"camel case\"}",
                 ),
             )
         every { snippetRepository.findAll() } returns snippets
@@ -53,7 +53,7 @@ class SnippetServiceTest {
                 "Code",
                 "python",
                 1L,
-                "{ \"identifier_format\": \"camel case\"}"
+                "{ \"identifier_format\": \"camel case\"}",
             )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(snippet)
 
@@ -76,7 +76,7 @@ class SnippetServiceTest {
                 "Code",
                 "python",
                 1L,
-                "{ \"identifier_format\": \"camel case\"}"
+                "{ \"identifier_format\": \"camel case\"}",
             )
         } returns newSnippet
         every { snippetRepository.save(newSnippet) } returns newSnippet
@@ -89,7 +89,7 @@ class SnippetServiceTest {
                 "Code",
                 "python",
                 1L,
-                "{ \"identifier_format\": \"camel case\"}"
+                "{ \"identifier_format\": \"camel case\"}",
             )
 
         // Assert
@@ -101,7 +101,7 @@ class SnippetServiceTest {
                 "Code",
                 "python",
                 1L,
-                "{ \"identifier_format\": \"camel case\"}"
+                "{ \"identifier_format\": \"camel case\"}",
             )
         }
         verify(exactly = 1) { snippetRepository.save(newSnippet) }
@@ -130,7 +130,7 @@ class SnippetServiceTest {
                 "Old Code",
                 "python",
                 1L,
-                "{ \"identifier_format\": \"camel case\"}"
+                "{ \"identifier_format\": \"camel case\"}",
             )
         val updatedSnippet =
             Snippet(
@@ -140,7 +140,7 @@ class SnippetServiceTest {
                 "Updated Code",
                 "python",
                 1L,
-                "{ \"identifier_format\": \"camel case\"}"
+                "{ \"identifier_format\": \"camel case\"}",
             )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(existingSnippet)
         every { snippetRepository.save(any()) } returns updatedSnippet
@@ -154,7 +154,7 @@ class SnippetServiceTest {
                 "Updated Code",
                 "python",
                 1L,
-                "{ \"identifier_format\": \"camel case\"}"
+                "{ \"identifier_format\": \"camel case\"}",
             )
 
         // Assert
@@ -177,7 +177,7 @@ class SnippetServiceTest {
                 "Updated Code",
                 "python",
                 1L,
-                "{ \"identifier_format\": \"camel case\"}"
+                "{ \"identifier_format\": \"camel case\"}",
             )
 
         // Assert

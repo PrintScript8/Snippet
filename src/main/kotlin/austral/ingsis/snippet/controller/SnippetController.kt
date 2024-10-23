@@ -31,10 +31,9 @@ class SnippetController(
                     snippet.code,
                     snippet.language,
                     snippet.ownerId,
-                    snippet.config
+                    snippet.config,
                 )
             return ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
-
         } catch (e: Exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
         }
@@ -64,7 +63,7 @@ class SnippetController(
             snippet.code,
             snippet.language,
             snippet.ownerId,
-            snippet.config
+            snippet.config,
         )
     }
 

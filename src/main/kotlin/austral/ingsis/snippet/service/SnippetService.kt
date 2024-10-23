@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 class SnippetService(
     @Autowired private val snippetRepository: SnippetRepositoryInterface,
     @Autowired private val snippetFactory: SnippetFactory,
-    @Autowired private val snippetValidator: SnippetValidator
+    @Autowired private val snippetValidator: SnippetValidator,
 ) {
     fun createSnippet(
         name: String,
@@ -22,7 +22,7 @@ class SnippetService(
         code: String,
         language: String,
         ownerId: Long,
-        config: String
+        config: String,
     ): Snippet {
         val snippet = snippetFactory.createSnippet(name, description, code, language, ownerId, config)
 
@@ -65,7 +65,7 @@ class SnippetService(
                 code = code,
                 language = language,
                 ownerId = ownerId,
-                config = config
+                config = config,
             )
 
         return try {
