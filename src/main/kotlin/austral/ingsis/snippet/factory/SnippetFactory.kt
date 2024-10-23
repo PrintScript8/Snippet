@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class SnippetFactory {
+    @Suppress("LongParameterList")
     fun createSnippet(
         name: String,
         description: String,

@@ -68,7 +68,16 @@ class SnippetServiceTest {
     @Test
     fun `should create new snippet`() {
         // Arrange
-        val newSnippet = Snippet(2, "New Snippet", "Description", "Code", "python", 1L, "{ \"identifier_format\": \"camel case\"}")
+        val newSnippet =
+            Snippet(
+                2,
+                "New Snippet",
+                "Description",
+                "Code",
+                "python",
+                1L,
+                "{ \"identifier_format\": \"camel case\"}",
+            )
         every {
             snippetFactory.createSnippet(
                 "New Snippet",
@@ -80,6 +89,13 @@ class SnippetServiceTest {
             )
         } returns newSnippet
         every { snippetRepository.save(newSnippet) } returns newSnippet
+        every {
+            snippetValidator.validateSnippet(
+                "Code",
+                "python",
+                "{ \"identifier_format\": \"camel case\"}",
+            )
+        } returns true
 
         // Act
         val result =
@@ -105,6 +121,13 @@ class SnippetServiceTest {
             )
         }
         verify(exactly = 1) { snippetRepository.save(newSnippet) }
+        verify(exactly = 1) {
+            snippetValidator.validateSnippet(
+                "Code",
+                "python",
+                "{ \"identifier_format\": \"camel case\"}",
+            )
+        }
     }
 
     @Test
@@ -121,7 +144,7 @@ class SnippetServiceTest {
 
     @Test
     fun `should update snippet`() {
-        // Arrange
+        // Arrange - Mock the service to return an existing snippet and then an updated snippet
         val existingSnippet =
             Snippet(
                 1,
@@ -144,7 +167,13 @@ class SnippetServiceTest {
             )
         every { snippetRepository.findById(1) } returns java.util.Optional.of(existingSnippet)
         every { snippetRepository.save(any()) } returns updatedSnippet
-
+        every {
+            snippetValidator.validateSnippet(
+                "Updated Code",
+                "python",
+                "{ \"identifier_format\": \"camel case\"}",
+            )
+        } returns true
         // Act
         val result =
             snippetService.updateSnippet(
@@ -161,6 +190,13 @@ class SnippetServiceTest {
         assertEquals(updatedSnippet, result)
         verify(exactly = 1) { snippetRepository.findById(1) }
         verify(exactly = 1) { snippetRepository.save(updatedSnippet) }
+        verify(exactly = 1) {
+            snippetValidator.validateSnippet(
+                "Updated Code",
+                "python",
+                "{ \"identifier_format\": \"camel case\"}",
+            )
+        }
     }
 
     @Test

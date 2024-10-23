@@ -16,6 +16,7 @@ class SnippetService(
     @Autowired private val snippetFactory: SnippetFactory,
     @Autowired private val snippetValidator: SnippetValidator,
 ) {
+    @Suppress("ThrowsCount", "LongParameterList")
     fun createSnippet(
         name: String,
         description: String,
@@ -34,7 +35,7 @@ class SnippetService(
             }
         } catch (e: InvalidSnippetException) {
             throw e
-        } catch (e: Exception) {
+        } catch (e: ServiceException) {
             throw ServiceException("Error creating snippet", e)
         }
     }
@@ -71,8 +72,8 @@ class SnippetService(
         return try {
             snippetValidator.validateSnippet(code, language, config)
             snippetRepository.save(updatedSnippet)
-        } catch (e: Exception) {
-            throw Exception("Error updating snippet", e)
+        } catch (e: ServiceException) {
+            throw ServiceException("Error updating snippet", e)
         }
     }
 

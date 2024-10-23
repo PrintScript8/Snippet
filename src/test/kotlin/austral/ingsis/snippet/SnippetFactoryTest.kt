@@ -14,7 +14,7 @@ class SnippetFactoryTest {
         val name = "Test Snippet"
         val description = "Test Description"
         val code = "Test Code"
-        val language = "python"
+        val language = "printscript"
         val ownerId = 1L
         val config = "{ \"identifier_format\": \"camel case\"}"
 
@@ -35,6 +35,7 @@ class SnippetFactoryTest {
         assertEquals(code, snippet.code)
         assertEquals(language, snippet.language)
         assertEquals(ownerId, snippet.ownerId)
+        assertEquals(config, snippet.config)
     }
 
     @Test
@@ -44,8 +45,9 @@ class SnippetFactoryTest {
         val expectedName = ""
         val expectedDescription = ""
         val expectedCode = ""
-        val expectedLanguage = "python"
+        val expectedLanguage = ""
         val expectedOwnerId = 0L
+        val expectedConfig = ""
 
         // Assert
         assertEquals(expectedName, emptySnippet.name)
@@ -53,5 +55,6 @@ class SnippetFactoryTest {
         assertEquals(expectedCode, emptySnippet.code)
         assertEquals(expectedLanguage, emptySnippet.language)
         assertEquals(expectedOwnerId, emptySnippet.ownerId)
+        assertEquals(expectedConfig, emptySnippet.config)
     }
 }

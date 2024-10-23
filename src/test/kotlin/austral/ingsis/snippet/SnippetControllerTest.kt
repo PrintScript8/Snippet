@@ -97,8 +97,7 @@ class SnippetControllerTest {
         // Act - Make a POST request to /snippets
         val jsonSnippet =
             """{ "name": "New Snippet", "description": "Description", "code": "Code",
-            | "languageId": 1, "ownerId": 1, "usersWithReadPermission": [],
-            |  "usersWithWritePermission": [] }
+        | "language": "python", "ownerId": 1, "config": "{ \"identifier_format\": \"camel case\"}"}
             """.trimMargin()
         mockMvc.perform(
             post("/snippets")
@@ -164,8 +163,8 @@ class SnippetControllerTest {
         // Act - Make a PUT request to /snippets/1
         val jsonSnippet =
             """{"id": "1", "name": "Updated Snippet", "description": "Updated Description",
-            | "code": "Updated Code", "languageId": 1, "ownerId": 1, 
-            | "usersWithReadPermission": [], "usersWithWritePermission": [] }
+        | "code": "Updated Code", "language": "python", "ownerId": 1,
+        | "config": "{ \"identifier_format\": \"camel case\"}"}
             """.trimMargin()
         mockMvc.perform(
             put("/snippets/1")

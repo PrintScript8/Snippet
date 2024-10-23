@@ -1,5 +1,6 @@
 package austral.ingsis.snippet.controller
 
+import austral.ingsis.snippet.exception.ServiceException
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.service.SnippetService
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,10 +21,11 @@ class SnippetController(
     @Autowired private val snippetService: SnippetService,
 ) {
     @PostMapping
+    @Suppress("SwallowedException")
     fun createSnippet(
         @RequestBody snippet: Snippet,
     ): ResponseEntity<Snippet> {
-        try {
+        return try {
             val createdSnippet =
                 snippetService.createSnippet(
                     snippet.name,
@@ -33,9 +35,9 @@ class SnippetController(
                     snippet.ownerId,
                     snippet.config,
                 )
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
-        } catch (e: Exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
+            ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
+        } catch (e: ServiceException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
         }
     }
 
