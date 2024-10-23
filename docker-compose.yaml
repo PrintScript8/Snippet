@@ -27,7 +27,3 @@ services:
 
 volumes:
   pgdata:
-
-networks:
-  snippet-searcher-network:
-    external: true

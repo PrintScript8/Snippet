@@ -9,8 +9,7 @@ import java.net.ConnectException
 class SnippetValidator(private val restTemplate: RestTemplate) {
 
     fun validateSnippet(code: String, language: String, config: String): Boolean {
-        val url = "http://parser-app:8081/parser/validate"
-
+        val url = "http://localhost:8081/parser/validate"
 
         val requestBody = mapOf(
             "code" to code,
