@@ -8,8 +8,6 @@ services:
     depends_on:
       - db
     env_file: .env
-    networks:
-      - snippet-searcher-network
 
   db:
     image: postgres:14
