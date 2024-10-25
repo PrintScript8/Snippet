@@ -5,10 +5,22 @@ import org.springframework.stereotype.Component
 
 @Component
 class SnippetFactory {
+    @Suppress("LongParameterList")
     fun createSnippet(
         name: String,
-        creationDate: String,
+        description: String,
+        code: String,
+        language: String,
+        ownerId: Long,
+        config: String,
     ): Snippet {
-        return Snippet(name = name, creationDate = creationDate)
+        return Snippet(
+            name = name,
+            description = description,
+            code = code,
+            language = language,
+            ownerId = ownerId,
+            config = config,
+        )
     }
 }

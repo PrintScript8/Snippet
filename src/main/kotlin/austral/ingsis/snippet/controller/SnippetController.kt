@@ -1,5 +1,6 @@
 package austral.ingsis.snippet.controller
 
+import austral.ingsis.snippet.exception.ServiceException
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.service.SnippetService
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,7 +34,14 @@ class SnippetController(
     fun updateSnippet(
         @RequestBody snippet: Snippet,
     ) {
-        return snippetService.updateSnippet(snippet.id, snippet.name, snippet.creationDate)
+        return snippetService.updateSnippet(
+            snippet.name,
+            snippet.description,
+            snippet.code,
+            snippet.language,
+            snippet.ownerId,
+            snippet.config,
+        )
     }
 
     @DeleteMapping("/{id}")
@@ -43,5 +51,4 @@ class SnippetController(
         snippetService.deleteSnippet(id)
         return ResponseEntity.noContent().build() // Retorna 204
     }
-
 }
