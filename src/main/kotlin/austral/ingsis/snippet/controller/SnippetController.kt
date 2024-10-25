@@ -1,10 +1,8 @@
 package austral.ingsis.snippet.controller
 
-import austral.ingsis.snippet.exception.ServiceException
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.service.SnippetService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -15,26 +13,31 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.reactive.function.client.WebClient
 
 @RestController
 @RequestMapping("/snippets")
 class SnippetController(
     @Autowired private val snippetService: SnippetService,
 ) {
-
-    @GetMapping("/{id}")
+    @GetMapping("/{id}", produces = ["application/json"])
     fun getSnippetById(
         @PathVariable id: Long,
-    ): Snippet? {
-        return snippetService.getSnippetById(id)
+    ): ResponseEntity<Snippet?> {
+        val snippet: Snippet? = snippetService.getSnippetById(id)
+        return if (snippet != null) {
+            ResponseEntity.status(HttpStatus.OK).body(snippet)
+        } else {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        }
     }
 
-    @PutMapping("/{id}")
-    fun updateSnippet(
+    @PostMapping
+    fun createSnippet(
         @RequestBody snippet: Snippet,
-    ) {
-        return snippetService.updateSnippet(
+    ): ResponseEntity<Long> {
+        val id: Long = (snippet.name + snippet.code + snippet.description).hashCode().toLong()
+        snippetService.updateSnippet(
+            id,
             snippet.name,
             snippet.description,
             snippet.code,
@@ -42,6 +45,24 @@ class SnippetController(
             snippet.ownerId,
             snippet.config,
         )
+        return ResponseEntity.status(HttpStatus.CREATED).body(id)
+    }
+
+    @PutMapping("/{id}")
+    fun updateSnippet(
+        @PathVariable id: Long,
+        @RequestBody snippet: Snippet,
+    ): ResponseEntity<Void> {
+        snippetService.updateSnippet(
+            id,
+            snippet.name,
+            snippet.description,
+            snippet.code,
+            snippet.language,
+            snippet.ownerId,
+            snippet.config,
+        )
+        return ResponseEntity.status(HttpStatus.OK).build()
     }
 
     @DeleteMapping("/{id}")
@@ -49,6 +70,6 @@ class SnippetController(
         @PathVariable id: Long,
     ): ResponseEntity<Void> {
         snippetService.deleteSnippet(id)
-        return ResponseEntity.noContent().build() // Retorna 204
+        return ResponseEntity.status(HttpStatus.OK).build()
     }
 }

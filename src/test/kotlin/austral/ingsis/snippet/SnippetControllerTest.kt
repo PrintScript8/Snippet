@@ -30,7 +30,16 @@ class SnippetControllerTest {
     @Test
     fun `should return snippet by id`() {
         // Arrange - Mock the service to return a specific snippet
-        val snippet = Snippet(1, "First Snippet", "Content of the first snippet")
+        val snippet =
+            Snippet(
+                1L,
+                "First Snippet",
+                "First Description",
+                "First Code",
+                "First Language",
+                1L,
+                "First Config",
+            )
         every { snippetService.getSnippetById(1) } returns snippet
 
         // Act - Make a GET request to /snippets/1
@@ -50,34 +59,127 @@ class SnippetControllerTest {
 
         // Act - Make a DELETE request to /snippets/1
         mockMvc.perform(delete("/snippets/1"))
-            .andExpect(status().isNoContent)
+            .andExpect(status().isOk)
 
         // Assert - Verify the service method was called
         verify(exactly = 1) { snippetService.deleteSnippet(1) }
     }
 
-@Test
-fun `should create snippet`() {
-    // Arrange - Mock the service to handle snippet creation and retrieval
-    every { snippetService.updateSnippet(1, "Name", "Date") } returns Unit
-    every { snippetService.getSnippetById(1) } returns Snippet(1, "Name", "Date")
+    @Test
+    fun `should create snippet`() {
+        // Arrange - Mock the service to handle snippet creation
+        val snippet =
+            Snippet(
+                0L,
+                "First Snippet",
+                "First Description",
+                "First Code",
+                "First Language",
+                1L,
+                "First Config",
+            )
+        val id = (snippet.name + snippet.code + snippet.description).hashCode().toLong()
+        every {
+            snippetService.updateSnippet(
+                id,
+                snippet.name,
+                snippet.description,
+                snippet.code,
+                snippet.language,
+                snippet.ownerId,
+                snippet.config,
+            )
+        } returns Unit
 
-    // Act - Make a PUT request to create the snippet
-    mockMvc.perform(put("/snippets/1")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content("{\"id\": 1, \"name\": \"Name\", \"creationDate\": \"Date\"}"))
-        .andExpect(status().isOk)
+        // Act - Make a POST request to create the snippet
+        mockMvc.perform(
+            post("/snippets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                        "name": "First Snippet",
+                        "description": "First Description",
+                        "code": "First Code",
+                        "language": "First Language",
+                        "ownerId": 1,
+                        "config": "First Config"
+                    }
+                    """.trimIndent(),
+                ),
+        )
+            .andExpect(status().isCreated)
+            .andExpect(content().string(id.toString()))
 
-    // Act - Make a GET request to retrieve the created snippet
-    mockMvc.perform(get("/snippets/1"))
-        .andExpect(status().isOk)
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.name").value("Name"))
-        .andExpect(jsonPath("$.creationDate").value("Date"))
+        // Assert - Verify the service method was called
+        verify(exactly = 1) {
+            snippetService.updateSnippet(
+                id,
+                snippet.name,
+                snippet.description,
+                snippet.code,
+                snippet.language,
+                snippet.ownerId,
+                snippet.config,
+            )
+        }
+    }
 
-    // Assert - Verify the service methods were called
-    verify(exactly = 1) { snippetService.updateSnippet(1, "Name", "Date") }
-    verify(exactly = 1) { snippetService.getSnippetById(1) }
-}
+    @Test
+    fun `should update snippet`() {
+        // Arrange - Mock the service to handle snippet update
+        val snippet =
+            Snippet(
+                1L,
+                "First Snippet",
+                "First Description",
+                "First Code",
+                "First Language",
+                1L,
+                "First Config",
+            )
+        every {
+            snippetService.updateSnippet(
+                1,
+                snippet.name,
+                snippet.description,
+                snippet.code,
+                snippet.language,
+                snippet.ownerId,
+                snippet.config,
+            )
+        } returns Unit
 
+        // Act - Make a PUT request to update the snippet
+        mockMvc.perform(
+            put("/snippets/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                        "name": "First Snippet",
+                        "description": "First Description",
+                        "code": "First Code",
+                        "language": "First Language",
+                        "ownerId": 1,
+                        "config": "First Config"
+                    }
+                    """.trimIndent(),
+                ),
+        )
+            .andExpect(status().isOk)
+
+        // Assert - Verify the service method was called
+        verify(exactly = 1) {
+            snippetService.updateSnippet(
+                1,
+                snippet.name,
+                snippet.description,
+                snippet.code,
+                snippet.language,
+                snippet.ownerId,
+                snippet.config,
+            )
+        }
+    }
 }

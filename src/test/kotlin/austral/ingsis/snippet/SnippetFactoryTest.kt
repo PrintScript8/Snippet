@@ -1,13 +1,10 @@
 package austral.ingsis.snippet
 
-import austral.ingsis.snippet.factory.SnippetFactory
 import austral.ingsis.snippet.model.Snippet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class SnippetFactoryTest {
-    private val snippetFactory = SnippetFactory()
-
     @Test
     fun `should create snippet`() {
         // Arrange
@@ -20,13 +17,14 @@ class SnippetFactoryTest {
 
         // Act
         val snippet =
-            snippetFactory.createSnippet(
-                name = name,
-                description = description,
-                code = code,
-                language = language,
-                ownerId = ownerId,
-                config = config,
+            Snippet(
+                1L,
+                name,
+                description,
+                code,
+                language,
+                ownerId,
+                config,
             )
 
         // Assert
@@ -40,7 +38,7 @@ class SnippetFactoryTest {
 
     @Test
     fun `should create empty snippet`() {
-        val emptySnippet = Snippet()
+        val emptySnippet = Snippet(1L, "", "", "", "", 0L, "")
 
         val expectedName = ""
         val expectedDescription = ""

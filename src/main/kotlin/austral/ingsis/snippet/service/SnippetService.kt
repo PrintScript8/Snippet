@@ -18,12 +18,17 @@ class SnippetService(
             .body(Snippet::class.java)
     }
 
+    @Suppress("LongParameterList")
     fun updateSnippet(
         id: Long,
         name: String,
-        creationDate: String,
+        description: String,
+        code: String,
+        language: String,
+        ownerId: Long,
+        config: String,
     ) {
-        val updatedSnippet = Snippet(id, name, creationDate)
+        val updatedSnippet = Snippet(id, name, description, code, language, ownerId, config)
         client.put()
             .uri("/v1/asset/{container}/{key}", "snippet", id)
             .body(updatedSnippet)

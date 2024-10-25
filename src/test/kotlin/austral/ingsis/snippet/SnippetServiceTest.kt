@@ -4,17 +4,17 @@ import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.service.SnippetService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.*
 import org.mockito.Mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 import org.springframework.web.client.RestClient
-import org. springframework. web. client. RestClient. RequestBodyUriSpec
-import org.springframework.web.client.RestClient.ResponseSpec
+import org.springframework.web.client.RestClient.RequestBodyUriSpec
 
 @RestClientTest(SnippetService::class)
 class SnippetServiceTest {
-
     @Mock
     private lateinit var requestHeadersUriSpec: RestClient.RequestHeadersUriSpec<*>
 
@@ -36,7 +36,7 @@ class SnippetServiceTest {
     @Autowired
     private lateinit var snippetService: SnippetService
 
-    private val snippet = Snippet(1L, "name", "creationDate")
+    private val snippet = Snippet(1L, "name", "description", "code", "language", 1L, "config")
 
     @BeforeEach
     fun setUp() {
@@ -89,7 +89,7 @@ class SnippetServiceTest {
         `when`(responseSpec.body(Snippet::class.java)).thenReturn(snippet)
 
         // Call the service method
-        snippetService.updateSnippet(1L, "name", "creationDate")
+        snippetService.updateSnippet(1L, "name", "description", "code", "language", 1L, "config")
 
         // Verify interactions
         verify(client, times(1)).put()
