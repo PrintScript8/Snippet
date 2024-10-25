@@ -1,6 +1,6 @@
 package austral.ingsis.snippet
 
-import austral.ingsis.snippet.controller.SnippetController
+import austral.ingsis.snippet.controller.SnippetPetitionController
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.service.SnippetService
 import com.ninjasquad.springmockk.MockkBean
@@ -19,8 +19,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest(SnippetController::class) // Tests only the controller
-class SnippetControllerTest {
+@WebMvcTest(SnippetPetitionController::class) // Tests only the controller
+class SnippetPetitionControllerTest {
     @Autowired
     lateinit var mockMvc: MockMvc
 

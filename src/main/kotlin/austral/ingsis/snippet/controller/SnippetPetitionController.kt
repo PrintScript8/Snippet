@@ -13,12 +13,16 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.client.RestClient
 
 @RestController
 @RequestMapping("/snippets")
-class SnippetController(
+class SnippetPetitionController(
     @Autowired private val snippetService: SnippetService,
 ) {
+
+    private val permissionClient: RestClient = RestClient.builder().baseUrl("http://permission-service:8081").build()
+
     @GetMapping("/{id}", produces = ["application/json"])
     fun getSnippetById(
         @PathVariable id: Long,
@@ -36,16 +40,20 @@ class SnippetController(
         @RequestBody snippet: Snippet,
     ): ResponseEntity<Long> {
         val id: Long = (snippet.name + snippet.code + snippet.description).hashCode().toLong()
-        snippetService.updateSnippet(
-            id,
-            snippet.name,
-            snippet.description,
-            snippet.code,
-            snippet.language,
-            snippet.ownerId,
-            snippet.config,
-        )
-        return ResponseEntity.status(HttpStatus.CREATED).body(id)
+        try {
+            snippetService.updateSnippet(
+                id,
+                snippet.name,
+                snippet.description,
+                snippet.code,
+                snippet.language,
+                snippet.ownerId,
+            )
+            return ResponseEntity.status(HttpStatus.CREATED).body(id)
+        }
+        catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+        }
     }
 
     @PutMapping("/{id}")
@@ -53,16 +61,20 @@ class SnippetController(
         @PathVariable id: Long,
         @RequestBody snippet: Snippet,
     ): ResponseEntity<Void> {
-        snippetService.updateSnippet(
-            id,
-            snippet.name,
-            snippet.description,
-            snippet.code,
-            snippet.language,
-            snippet.ownerId,
-            snippet.config,
-        )
-        return ResponseEntity.status(HttpStatus.OK).build()
+        try{
+            snippetService.updateSnippet(
+                id,
+                snippet.name,
+                snippet.description,
+                snippet.code,
+                snippet.language,
+                snippet.ownerId,
+            )
+            return ResponseEntity.status(HttpStatus.OK).build()
+        }
+        catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -72,4 +84,5 @@ class SnippetController(
         snippetService.deleteSnippet(id)
         return ResponseEntity.status(HttpStatus.OK).build()
     }
+
 }

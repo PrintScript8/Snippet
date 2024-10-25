@@ -40,7 +40,7 @@ class SnippetServiceTest {
 
     @BeforeEach
     fun setUp() {
-        snippetService.client = client
+        snippetService.bucketClient = client
     }
 
     @Test
