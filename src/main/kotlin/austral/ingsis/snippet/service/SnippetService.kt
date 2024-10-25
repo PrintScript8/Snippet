@@ -1,43 +1,40 @@
 package austral.ingsis.snippet.service
 
-import austral.ingsis.snippet.factory.SnippetFactory
 import austral.ingsis.snippet.model.Snippet
-import austral.ingsis.snippet.repository.SnippetRepositoryInterface
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClient
 
 @Service
 class SnippetService(
-    @Autowired private val snippetRepository: SnippetRepositoryInterface,
-    @Autowired private val snippetFactory: SnippetFactory,
+    @Autowired final val restClient: RestClient.Builder,
 ) {
-    fun createSnippet(
-        name: String,
-        creationDate: String,
-    ): Snippet {
-        val snippet = snippetFactory.createSnippet(name, creationDate)
-        return snippetRepository.save(snippet)
-    }
-
-    fun getAllSnippets(): List<Snippet> {
-        return snippetRepository.findAll()
-    }
+    var client: RestClient = restClient.baseUrl("http://asset-service:8080").build()
 
     fun getSnippetById(id: Long): Snippet? {
-        return snippetRepository.findById(id).orElse(null)
+        return client.get()
+            .uri("/v1/asset/{container}/{key}", "snippet", id)
+            .retrieve()
+            .body(Snippet::class.java)
     }
 
     fun updateSnippet(
         id: Long,
         name: String,
         creationDate: String,
-    ): Snippet? {
-        val snippet = snippetRepository.findById(id).orElse(null) ?: return null
-        val updatedSnippet = snippet.copy(name = name, creationDate = creationDate)
-        return snippetRepository.save(updatedSnippet)
+    ) {
+        val updatedSnippet = Snippet(id, name, creationDate)
+        client.put()
+            .uri("/v1/asset/{container}/{key}", "snippet", id)
+            .body(updatedSnippet)
+            .retrieve()
+            .body(Snippet::class.java)
     }
 
     fun deleteSnippet(id: Long) {
-        snippetRepository.deleteById(id)
+        client.delete()
+            .uri("/v1/asset/{container}/{key}", "snippet", id)
+            .retrieve()
+            .body(Void::class.java)
     }
 }

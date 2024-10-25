@@ -1,103 +1,101 @@
 package austral.ingsis.snippet
 
-import austral.ingsis.snippet.factory.SnippetFactory
 import austral.ingsis.snippet.model.Snippet
-import austral.ingsis.snippet.repository.SnippetRepositoryInterface
 import austral.ingsis.snippet.service.SnippetService
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.*
+import org.mockito.Mock
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
+import org.springframework.web.client.RestClient
+import org. springframework. web. client. RestClient. RequestBodyUriSpec
+import org.springframework.web.client.RestClient.ResponseSpec
 
+@RestClientTest(SnippetService::class)
 class SnippetServiceTest {
-    private val snippetRepository = mockk<SnippetRepositoryInterface>()
-    private val snippetFactory = mockk<SnippetFactory>()
-    private val snippetService = SnippetService(snippetRepository, snippetFactory)
 
-    @Test
-    fun `should return all snippets`() {
-        // Arrange
-        val snippets = listOf(Snippet(1, "First Snippet", "Content of the first snippet"))
-        every { snippetRepository.findAll() } returns snippets
+    @Mock
+    private lateinit var requestHeadersUriSpec: RestClient.RequestHeadersUriSpec<*>
 
-        // Act
-        val result = snippetService.getAllSnippets()
+    @Mock
+    private lateinit var requestBodyUriSpec: RequestBodyUriSpec
 
-        // Assert
-        assertEquals(snippets, result)
-        verify(exactly = 1) { snippetRepository.findAll() }
+    @Mock
+    private lateinit var requestBodySpec: RestClient.RequestBodySpec
+
+    @Mock
+    private lateinit var requestHeadersSpec: RestClient.RequestHeadersSpec<*>
+
+    @Mock
+    private lateinit var responseSpec: RestClient.ResponseSpec
+
+    @Mock
+    private lateinit var client: RestClient
+
+    @Autowired
+    private lateinit var snippetService: SnippetService
+
+    private val snippet = Snippet(1L, "name", "creationDate")
+
+    @BeforeEach
+    fun setUp() {
+        snippetService.client = client
     }
 
     @Test
-    fun `should return snippet by id`() {
-        // Arrange
-        val snippet = Snippet(1, "First Snippet", "Content of the first snippet")
-        every { snippetRepository.findById(1) } returns java.util.Optional.of(snippet)
+    fun `should call the asset service to get snippet by id`() {
+        // Mocking method calls for HTTP request flow
+        `when`(client.get()).thenReturn(requestHeadersUriSpec)
+        `when`(requestHeadersUriSpec.uri("/v1/asset/{container}/{key}", "snippet", 1L)).thenReturn(requestHeadersSpec)
+        `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
+        `when`(responseSpec.body(Snippet::class.java)).thenReturn(snippet)
 
-        // Act
-        val result = snippetService.getSnippetById(1)
+        // Call the service method
+        snippetService.getSnippetById(1L)
 
-        // Assert
-        assertEquals(snippet, result)
-        verify(exactly = 1) { snippetRepository.findById(1) }
+        // Verify interactions
+        verify(client, times(1)).get()
+        verify(requestHeadersUriSpec, times(1)).uri("/v1/asset/{container}/{key}", "snippet", 1L)
+        verify(requestHeadersSpec, times(1)).retrieve()
+        verify(responseSpec, times(1)).body(Snippet::class.java)
     }
 
     @Test
-    fun `should create new snippet`() {
-        // Arrange
-        val newSnippet = Snippet(2, "New Snippet", "New Content")
-        every { snippetFactory.createSnippet("New Snippet", "New Content") } returns newSnippet
-        every { snippetRepository.save(newSnippet) } returns newSnippet
+    fun `should call the asset service to delete snippet`() {
+        // Mocking method calls for HTTP request flow
+        `when`(client.delete()).thenReturn(requestHeadersUriSpec)
+        `when`(requestHeadersUriSpec.uri("/v1/asset/{container}/{key}", "snippet", 1L)).thenReturn(requestHeadersSpec)
+        `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
+        `when`(responseSpec.body(Void::class.java)).thenReturn(null)
 
-        // Act
-        val result = snippetService.createSnippet("New Snippet", "New Content")
+        // Call the service method
+        snippetService.deleteSnippet(1L)
 
-        // Assert
-        assertEquals(newSnippet, result)
-        verify(exactly = 1) { snippetFactory.createSnippet("New Snippet", "New Content") }
-        verify(exactly = 1) { snippetRepository.save(newSnippet) }
+        // Verify interactions
+        verify(client, times(1)).delete()
+        verify(requestHeadersUriSpec, times(1)).uri("/v1/asset/{container}/{key}", "snippet", 1L)
+        verify(requestHeadersSpec, times(1)).retrieve()
+        verify(responseSpec, times(1)).body(Void::class.java)
     }
 
     @Test
-    fun `should delete snippet by id`() {
-        // Arrange
-        every { snippetRepository.deleteById(1) } returns Unit
+    fun `should call the asset service to update snippet`() {
+        // Mocking method calls for HTTP request flow
+        `when`(client.put()).thenReturn(requestBodyUriSpec)
+        `when`(requestBodyUriSpec.uri("/v1/asset/{container}/{key}", "snippet", 1L)).thenReturn(requestBodySpec)
+        `when`(requestBodySpec.body(snippet)).thenReturn(requestBodySpec)
+        `when`(requestBodySpec.retrieve()).thenReturn(responseSpec)
+        `when`(responseSpec.body(Snippet::class.java)).thenReturn(snippet)
 
-        // Act
-        snippetService.deleteSnippet(1)
+        // Call the service method
+        snippetService.updateSnippet(1L, "name", "creationDate")
 
-        // Assert
-        verify(exactly = 1) { snippetRepository.deleteById(1) }
-    }
-
-    @Test
-    fun `should update snippet`() {
-        // Arrange
-        val existingSnippet = Snippet(1, "Old Snippet", "Old Content")
-        val updatedSnippet = Snippet(1, "Updated Snippet", "Updated Content")
-        every { snippetRepository.findById(1) } returns java.util.Optional.of(existingSnippet)
-        every { snippetRepository.save(any()) } returns updatedSnippet
-
-        // Act
-        val result = snippetService.updateSnippet(1, "Updated Snippet", "Updated Content")
-
-        // Assert
-        assertEquals(updatedSnippet, result)
-        verify(exactly = 1) { snippetRepository.findById(1) }
-        verify(exactly = 1) { snippetRepository.save(updatedSnippet) }
-    }
-
-    @Test
-    fun `should return null updating non-existing snippet`() {
-        // Arrange
-        every { snippetRepository.findById(1) } returns java.util.Optional.empty()
-
-        // Act
-        val result = snippetService.updateSnippet(1, "Updated Snippet", "Updated Content")
-
-        // Assert
-        assertEquals(null, result)
-        verify(exactly = 1) { snippetRepository.findById(1) }
+        // Verify interactions
+        verify(client, times(1)).put()
+        verify(requestBodyUriSpec, times(1)).uri("/v1/asset/{container}/{key}", "snippet", 1L)
+        verify(requestBodySpec, times(1)).body(snippet)
+        verify(requestBodySpec, times(1)).retrieve()
+        verify(responseSpec, times(1)).body(Snippet::class.java)
     }
 }
