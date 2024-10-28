@@ -11,7 +11,7 @@ class SnippetService(
     @Autowired final val restClientBuilder: RestClient.Builder,
 ) {
     var bucketClient: RestClient = restClientBuilder.baseUrl("http://asset-service:8080").build()
-    var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8081").build()
+    var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8080").build()
 
     fun getSnippetById(id: Long): Snippet? {
         return bucketClient.get()
@@ -30,11 +30,12 @@ class SnippetService(
         ownerId: Long,
     ) {
         val updatedSnippet = Snippet(id, name, description, code, language, ownerId)
-        val result = parserClient.post()
-            .uri("/parser/validate")
-            .body(updatedSnippet)
-            .retrieve()
-            .toBodilessEntity()
+        val result =
+            parserClient.put()
+                .uri("/parser/validate")
+                .body(updatedSnippet)
+                .retrieve()
+                .toBodilessEntity()
 
         if (result.statusCode.is2xxSuccessful) {
             bucketClient.put()
@@ -42,8 +43,7 @@ class SnippetService(
                 .body(updatedSnippet)
                 .retrieve()
                 .body(Snippet::class.java)
-        }
-        else {
+        } else {
             throw InvalidSnippetException("Invalid snippet")
         }
     }

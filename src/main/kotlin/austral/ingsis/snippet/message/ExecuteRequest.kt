@@ -1,8 +1,8 @@
 package austral.ingsis.snippet.message
 
 data class ExecuteRequest(
+    val ownerId: Long,
     val language: String,
-    val code: String,
+    val rules: String,
     val action: String,
-    val inputs: String,
 )

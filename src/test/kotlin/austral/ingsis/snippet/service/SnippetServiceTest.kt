@@ -1,19 +1,18 @@
-package austral.ingsis.snippet
+package austral.ingsis.snippet.service
 
 import austral.ingsis.snippet.model.Snippet
-import austral.ingsis.snippet.service.SnippetService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
+import org.mockito.MockitoAnnotations
+import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClient.RequestBodyUriSpec
 
-@RestClientTest(SnippetService::class)
 class SnippetServiceTest {
     @Mock
     private lateinit var requestHeadersUriSpec: RestClient.RequestHeadersUriSpec<*>
@@ -33,14 +32,19 @@ class SnippetServiceTest {
     @Mock
     private lateinit var client: RestClient
 
-    @Autowired
+    @Mock
+    private lateinit var builder: RestClient.Builder
+
     private lateinit var snippetService: SnippetService
 
-    private val snippet = Snippet(1L, "name", "description", "code", "language", 1L, "config")
+    private val snippet = Snippet(1L, "name", "description", "code", "language", 1L)
 
     @BeforeEach
     fun setUp() {
-        snippetService.bucketClient = client
+        MockitoAnnotations.openMocks(this)
+        `when`(builder.baseUrl(anyString())).thenReturn(builder)
+        `when`(builder.build()).thenReturn(client)
+        snippetService = SnippetService(builder)
     }
 
     @Test
@@ -84,18 +88,21 @@ class SnippetServiceTest {
         // Mocking method calls for HTTP request flow
         `when`(client.put()).thenReturn(requestBodyUriSpec)
         `when`(requestBodyUriSpec.uri("/v1/asset/{container}/{key}", "snippet", 1L)).thenReturn(requestBodySpec)
+        `when`(requestBodyUriSpec.uri("/parser/validate")).thenReturn(requestBodySpec)
         `when`(requestBodySpec.body(snippet)).thenReturn(requestBodySpec)
         `when`(requestBodySpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(Snippet::class.java)).thenReturn(snippet)
+        `when`(responseSpec.toBodilessEntity()).thenReturn(ResponseEntity.ok().build())
 
         // Call the service method
-        snippetService.updateSnippet(1L, "name", "description", "code", "language", 1L, "config")
+        snippetService.updateSnippet(1L, "name", "description", "code", "language", 1L)
 
         // Verify interactions
-        verify(client, times(1)).put()
+        verify(client, times(2)).put()
         verify(requestBodyUriSpec, times(1)).uri("/v1/asset/{container}/{key}", "snippet", 1L)
-        verify(requestBodySpec, times(1)).body(snippet)
-        verify(requestBodySpec, times(1)).retrieve()
+        verify(requestBodySpec, times(2)).body(snippet)
+        verify(requestBodySpec, times(2)).retrieve()
         verify(responseSpec, times(1)).body(Snippet::class.java)
+        verify(responseSpec, times(1)).toBodilessEntity()
+        verify(requestBodyUriSpec, times(1)).uri("/parser/validate")
     }
 }

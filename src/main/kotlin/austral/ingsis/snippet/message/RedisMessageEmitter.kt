@@ -14,12 +14,12 @@ class RedisMessageEmitter
         redis: RedisTemplate<String, String>,
     ) : RedisStreamProducer(streamKey, redis) {
         fun publishEvent(
+            ownerId: Long,
             language: String,
-            code: String,
+            rules: String,
             action: String,
-            inputs: String,
         ) {
-            val publishingMessage = ExecuteRequest(language, code, action, inputs)
+            val publishingMessage = ExecuteRequest(ownerId, language, rules, action)
             emit(publishingMessage)
         }
     }
