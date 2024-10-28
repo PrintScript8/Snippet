@@ -1,5 +1,5 @@
 services:
-  app:
+  snippet-app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,6 +7,7 @@ services:
       - "8080:8080"
     depends_on:
       - db
+    env_file: .env
 
   db:
     image: postgres:14
@@ -20,5 +21,29 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  api:
+    container_name: "asset-service"
+    image: ghcr.io/austral-ingsis/snippet-asset-service:latest
+    ports:
+      - "8081:8080"
+    environment:
+      AZURE_HOST: "http://azurite"
+      NEW_RELIC_APP_NAME: "asset-service"
+      NEW_RELIC_AGENT_ENABLED: "false"
+
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: "azurite"
+    hostname: azurite
+    restart: always
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - blob:/workspace
+
 volumes:
   pgdata:
+  blob:

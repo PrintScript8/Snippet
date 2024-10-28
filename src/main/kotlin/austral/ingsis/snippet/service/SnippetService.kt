@@ -1,43 +1,57 @@
 package austral.ingsis.snippet.service
 
-import austral.ingsis.snippet.factory.SnippetFactory
+import austral.ingsis.snippet.exception.InvalidSnippetException
 import austral.ingsis.snippet.model.Snippet
-import austral.ingsis.snippet.repository.SnippetRepositoryInterface
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClient
 
 @Service
 class SnippetService(
-    @Autowired private val snippetRepository: SnippetRepositoryInterface,
-    @Autowired private val snippetFactory: SnippetFactory,
+    @Autowired final val restClientBuilder: RestClient.Builder,
 ) {
-    fun createSnippet(
-        name: String,
-        creationDate: String,
-    ): Snippet {
-        val snippet = snippetFactory.createSnippet(name, creationDate)
-        return snippetRepository.save(snippet)
-    }
-
-    fun getAllSnippets(): List<Snippet> {
-        return snippetRepository.findAll()
-    }
+    var bucketClient: RestClient = restClientBuilder.baseUrl("http://asset-service:8080").build()
+    var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8080").build()
 
     fun getSnippetById(id: Long): Snippet? {
-        return snippetRepository.findById(id).orElse(null)
+        return bucketClient.get()
+            .uri("/v1/asset/{container}/{key}", "snippet", id)
+            .retrieve()
+            .body(Snippet::class.java)
     }
 
+    @Suppress("LongParameterList")
     fun updateSnippet(
         id: Long,
         name: String,
-        creationDate: String,
-    ): Snippet? {
-        val snippet = snippetRepository.findById(id).orElse(null) ?: return null
-        val updatedSnippet = snippet.copy(name = name, creationDate = creationDate)
-        return snippetRepository.save(updatedSnippet)
+        description: String,
+        code: String,
+        language: String,
+        ownerId: Long,
+    ) {
+        val updatedSnippet = Snippet(id, name, description, code, language, ownerId)
+        val result =
+            parserClient.put()
+                .uri("/parser/validate")
+                .body(updatedSnippet)
+                .retrieve()
+                .toBodilessEntity()
+
+        if (result.statusCode.is2xxSuccessful) {
+            bucketClient.put()
+                .uri("/v1/asset/{container}/{key}", "snippet", id)
+                .body(updatedSnippet)
+                .retrieve()
+                .body(Snippet::class.java)
+        } else {
+            throw InvalidSnippetException("Invalid snippet")
+        }
     }
 
     fun deleteSnippet(id: Long) {
-        snippetRepository.deleteById(id)
+        bucketClient.delete()
+            .uri("/v1/asset/{container}/{key}", "snippet", id)
+            .retrieve()
+            .body(Void::class.java)
     }
 }

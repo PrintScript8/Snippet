@@ -17,6 +17,15 @@ java {
 
 repositories {
 	mavenCentral()
+
+	maven {
+		name = "IngSis Redis Streams"
+		url = uri("https://maven.pkg.github.com/austral-ingsis/class-redis-streams")
+		credentials {
+			username = System.getenv("GITHUB_ACTOR")
+			password = System.getenv("GITHUB_TOKEN")
+		}
+	}
 }
 
 dependencies {
@@ -25,9 +34,11 @@ dependencies {
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.postgresql:postgresql'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation("com.ninja-squad:springmockk:3.1.1")
+	testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -40,6 +51,10 @@ dependencies {
 	testImplementation 'org.testcontainers:testcontainers:1.20.2'
 	testImplementation 'org.testcontainers:junit-jupiter:1.19.0'
 	testImplementation 'org.testcontainers:postgresql:1.19.0'
+
+	// IngSis Async communication
+	implementation 'org.austral.ingsis:redis-streams-mvc:0.1.13'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 }
 
 kotlin {
