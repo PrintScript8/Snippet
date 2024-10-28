@@ -1,4 +1,3 @@
-// File: SnippetService.kt
 package austral.ingsis.snippet.service
 
 import austral.ingsis.snippet.exception.InvalidSnippetException
@@ -29,6 +28,22 @@ class SnippetService(
 
         return try {
             if (snippetValidator.validateSnippet(code, language, config)) {
+                snippetRepository.save(snippet)
+            } else {
+                throw InvalidSnippetException("Snippet is invalid")
+            }
+        } catch (e: InvalidSnippetException) {
+            throw e
+        } catch (e: ServiceException) {
+            throw ServiceException("Error creating snippet", e)
+        }
+    }
+
+    fun createSnippetFromFile(name: String, code: String): Snippet {
+        val snippet = snippetFactory.createSnippet(name, "", code, "printscript", 0, "")
+
+        return try {
+            if (snippetValidator.validateSnippet(snippet.code, snippet.language, snippet.config)) {
                 snippetRepository.save(snippet)
             } else {
                 throw InvalidSnippetException("Snippet is invalid")

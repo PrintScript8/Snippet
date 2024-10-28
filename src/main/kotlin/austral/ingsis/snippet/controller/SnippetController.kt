@@ -6,14 +6,8 @@ import austral.ingsis.snippet.service.SnippetService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/snippets")
@@ -38,6 +32,29 @@ class SnippetController(
             ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
         } catch (e: ServiceException) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
+        }
+    }
+
+    // Upload snippet with txtFile directly from MultipartFile
+    @PostMapping("/upload")
+    fun uploadSnippet(
+        @RequestParam("file") file: MultipartFile,
+    ): ResponseEntity<Any> {
+        return try {
+            // Leer el contenido del archivo directamente desde MultipartFile
+            val content = file.inputStream.bufferedReader().use { it.readText() }
+
+            // Crear el snippet usando el contenido leído
+            val createdSnippet = snippetService.createSnippetFromFile(
+                name = file.originalFilename ?: "unknown.txt",
+                code = content
+            )
+
+            ResponseEntity.status(HttpStatus.CREATED).body(createdSnippet)
+        } catch (e: ServiceException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "An unexpected error occurred: ${e.message}"))
         }
     }
 
