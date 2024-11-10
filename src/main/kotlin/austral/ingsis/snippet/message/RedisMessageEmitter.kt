@@ -1,6 +1,5 @@
 package austral.ingsis.snippet.message
 
-import austral.ingsis.snippet.controller.SnippetController
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.logging.log4j.LogManager
 import org.austral.ingsis.redis.RedisStreamProducer
@@ -10,7 +9,12 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 
 interface MessageEmitter {
-    fun publishEvent(ownerId: Long, language: String, rules: String, action: String,)
+    fun publishEvent(
+        ownerId: Long,
+        language: String,
+        rules: String,
+        action: String,
+    )
 }
 
 @Component
@@ -20,8 +24,7 @@ class RedisMessageEmitter
         @Value("\${stream.key}") streamKey: String,
         redis: RedisTemplate<String, String>,
     ) : MessageEmitter, RedisStreamProducer(streamKey, redis) {
-
-    private val logger = LogManager.getLogger(RedisMessageEmitter::class.java)
+        private val logger = LogManager.getLogger(RedisMessageEmitter::class.java)
 
         override fun publishEvent(
             ownerId: Long,

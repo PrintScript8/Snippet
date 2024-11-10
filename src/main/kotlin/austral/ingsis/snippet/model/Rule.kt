@@ -12,13 +12,13 @@ data class Rule(
     val name: String,
     val isActive: Boolean,
     val value: String?,
-    val type: ConfigType
+    val type: ConfigType,
 ) {
     constructor() : this(0L, "", false, "", ConfigType.FORMATTING)
 
     override fun toString(): String {
         return if (value == null) {
-            "\"${name}\": ${isActive}"
+            "\"${name}\": $isActive"
         } else {
             "\"${name}\": \"$value\""
         }
@@ -29,7 +29,8 @@ data class Rule(
 
 /*
 Formmating:
-{ "rules": { "spaceBeforeColon": false, "spaceAfterColon": true, "spaceAroundEquals": true, "newlineBeforePrintln": 2 } }
+{ "rules": {
+ "spaceBeforeColon": false, "spaceAfterColon": true, "spaceAroundEquals": true, "newlineBeforePrintln": 2 } }
 
 Linting:
 

@@ -20,7 +20,13 @@ class SnippetFactoryTest {
         // Act
         val snippet =
             CommunicationSnippet(
-                id, name, language, ownerId, content, extension, status
+                id,
+                name,
+                language,
+                ownerId,
+                content,
+                extension,
+                status,
             )
 
         // Assert
@@ -33,15 +39,24 @@ class SnippetFactoryTest {
 
     @Test
     fun `should create empty snippet`() {
-        val emptySnippet = CommunicationSnippet(1L, "", "", 1L, "", "", ComplianceEnum.COMPLIANT)
+        val emptySnippet =
+            CommunicationSnippet(
+                1L,
+                "",
+                "",
+                1L,
+                "",
+                "",
+                ComplianceEnum.COMPLIANT,
+            )
 
-        val expectedId: Long = 1L
+        // val expectedId: Long = 1L
         val expectedName: String = ""
         val expectedLanguage: String = ""
         val expectedOwnerId: Long = 1L
         val expectedContent: String = ""
-        val expectedExtension: String = ""
-        val expectedStatus: ComplianceEnum = ComplianceEnum.COMPLIANT
+        // val expectedExtension: String = ""
+        // val expectedStatus: ComplianceEnum = ComplianceEnum.COMPLIANT
 
         // Assert
         assertEquals(expectedName, emptySnippet.name)

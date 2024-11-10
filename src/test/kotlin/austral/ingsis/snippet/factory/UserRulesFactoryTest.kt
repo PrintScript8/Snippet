@@ -18,18 +18,19 @@ class UserRulesFactoryTest {
         // Arrange
         val userId = 1L
         val language = "kotlin"
-        val formattingConfig = "some-formatting-config"
+        // val formattingConfig = "some-formatting-config"
 
         // Act
         val userRules: UserRules =
             userRulesFactory.buildUserRules(
                 userId = userId,
                 language = language,
-                allRules = emptyList<Long>()
+                allRules = emptyList<Long>(),
             )
 
         // Assert
         assertEquals(userId, userRules.userId)
         assertEquals(language, userRules.language)
-        assertEquals(emptyList<Long>(), userRules.allRules) }
+        assertEquals(emptyList<Long>(), userRules.allRules)
+    }
 }

@@ -2,7 +2,6 @@ package austral.ingsis.snippet.controller
 
 import austral.ingsis.snippet.exception.InvalidSnippetException
 import austral.ingsis.snippet.model.CommunicationSnippet
-import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.service.SnippetService
 import austral.ingsis.snippet.service.ValidationService
 import jakarta.servlet.http.HttpServletRequest
@@ -34,10 +33,10 @@ class SnippetController(
     @GetMapping("/{id}")
     fun getSnippetById(
         @PathVariable id: Long,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<CommunicationSnippet?> {
         val userId = request.getHeader("id").toLong()
-        if(!validationService.canRead(userId, id)) {
+        if (!validationService.canRead(userId, id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null)
         }
         val snippet: CommunicationSnippet? = snippetService.getSnippetById(id)
@@ -48,23 +47,25 @@ class SnippetController(
         }
     }
 
+    @Suppress("ReturnCount")
     @PostMapping
     fun createSnippet(
         @RequestBody snippet: MessageSnippet,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<Long> {
         val userId = request.getHeader("id").toLong()
         if (!validationService.exists(userId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
         }
         try {
-            val id = snippetService.createSnippet(
-                snippet.name,
-                snippet.content,
-                snippet.language,
-                userId,
-                snippet.extension
-            )
+            val id =
+                snippetService.createSnippet(
+                    snippet.name,
+                    snippet.content,
+                    snippet.language,
+                    userId,
+                    snippet.extension,
+                )
             permissionClient
                 .put()
                 .uri("/users/snippets/{snippetId}", id)
@@ -78,12 +79,13 @@ class SnippetController(
         }
     }
 
+    @Suppress("ReturnCount")
     @PutMapping("/{id}")
     fun updateSnippet(
         @PathVariable id: Long,
         @RequestBody content: Content,
         @RequestParam language: String,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<Void> {
         val userId = request.getHeader("id").toLong()
         if (!validationService.canModify(userId, id)) {
@@ -94,7 +96,7 @@ class SnippetController(
             snippetService.updateSnippet(
                 id,
                 content.content,
-                language
+                language,
             )
             return ResponseEntity.status(HttpStatus.OK).build()
         } catch (e: InvalidSnippetException) {
@@ -106,11 +108,13 @@ class SnippetController(
     @DeleteMapping("/{id}")
     fun deleteSnippet(
         @PathVariable id: Long,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<String> {
         val userId = request.getHeader("id").toLong()
-        if(!validationService.canDelete(userId, id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User with id $userId cannot delete snippet with id $id")
+        if (!validationService.canDelete(userId, id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                "User with id $userId cannot delete snippet with id $id",
+            )
         }
         val snippet: CommunicationSnippet? = snippetService.getSnippetById(id)
         if (snippet != null) {
@@ -125,33 +129,46 @@ class SnippetController(
         page: Int,
         pageSize: Int,
         snippetName: String?,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<PaginationSnippet> {
         val userId = request.getHeader("id").toLong()
         if (!validationService.exists(userId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
         }
-        val snippets: List<CommunicationSnippet> = snippetService.paginatedSnippets(page, pageSize, snippetName ?: "")
-        val paginatedSnippets = PaginationSnippet(page, pageSize, snippets.size, snippets.filter { validationService.canRead(userId, it.id!!) })
+        val snippets: List<CommunicationSnippet> =
+            snippetService.paginatedSnippets(
+                page,
+                pageSize,
+                snippetName ?: "",
+            )
+        val paginatedSnippets =
+            PaginationSnippet(
+                page,
+                pageSize,
+                snippets.size,
+                snippets.filter {
+                    validationService.canRead(userId, it.id!!)
+                },
+            )
         logger.info("Returning paginated snippets: $paginatedSnippets")
         return ResponseEntity.status(HttpStatus.OK).body(paginatedSnippets)
     }
-
 }
+
 data class MessageSnippet(
     val name: String,
     val language: String,
     val content: String,
-    val extension: String
+    val extension: String,
 )
 
 data class PaginationSnippet(
     val page: Int,
     val pageSize: Int,
     val count: Int,
-    val snippets: List<CommunicationSnippet>
+    val snippets: List<CommunicationSnippet>,
 )
 
 data class Content(
-    val content: String
+    val content: String,
 )

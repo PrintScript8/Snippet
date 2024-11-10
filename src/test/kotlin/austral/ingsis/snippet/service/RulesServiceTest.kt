@@ -1,28 +1,8 @@
 package austral.ingsis.snippet.service
 
-import austral.ingsis.snippet.factory.UserRulesFactory
-import austral.ingsis.snippet.model.ConfigType
-import austral.ingsis.snippet.model.UserRules
-import austral.ingsis.snippet.repository.RulesRepository
-import austral.ingsis.snippet.model.Rule
-import austral.ingsis.snippet.repository.UserRulesRepository
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import org.springframework.web.client.RestClient
 
 class RulesServiceTest {
-
-
-
-
-
     /*
     @Mock
     private lateinit var userRulesFactory: UserRulesFactory
@@ -175,5 +155,5 @@ class RulesServiceTest {
         )
         rulesService.updateRules(1, "ps", ConfigType.FORMATTING, rules)
     }
-    */
+     */
 }

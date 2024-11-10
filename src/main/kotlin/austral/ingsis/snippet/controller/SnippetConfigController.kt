@@ -21,14 +21,14 @@ class SnippetConfigController(
     @Autowired private val rulesService: RulesService,
     @Autowired private val messageEmitter: RedisMessageEmitter,
 ) {
-
     @GetMapping("/linting")
     fun getLintingConfig(
         request: HttpServletRequest,
         @RequestParam language: String,
     ): ResponseEntity<List<Rule>> {
         val userId = request.getHeader("id").toLong()
-        val rules =  rulesService.getRules(userId, ConfigType.LINTING)
+        val rules = rulesService.getRules(userId, ConfigType.LINTING)
+        println("Requested linting config for language: $language")
         return ResponseEntity.ok(rules)
     }
 
@@ -38,7 +38,8 @@ class SnippetConfigController(
         @RequestParam language: String,
     ): ResponseEntity<List<Rule>> {
         val userId = request.getHeader("id").toLong()
-        val rules =  rulesService.getRules(userId, ConfigType.FORMATTING)
+        val rules = rulesService.getRules(userId, ConfigType.FORMATTING)
+        println("Requested formatting config for language: $language")
         return ResponseEntity.ok(rules)
     }
 
@@ -46,7 +47,7 @@ class SnippetConfigController(
     fun updateFormattingRules(
         request: HttpServletRequest,
         @RequestBody rules: List<Rule>,
-        @RequestParam language: String
+        @RequestParam language: String,
     ) {
         val userId = request.getHeader("id").toLong()
         val jsonRules = rulesService.updateRules(userId, language, ConfigType.FORMATTING, rules)
@@ -59,7 +60,7 @@ class SnippetConfigController(
     fun updateLintingRules(
         request: HttpServletRequest,
         @RequestBody rules: List<Rule>,
-        @RequestParam language: String
+        @RequestParam language: String,
     ) {
         val userId = request.getHeader("id").toLong()
         val jsonRules = rulesService.updateRules(userId, language, ConfigType.LINTING, rules)

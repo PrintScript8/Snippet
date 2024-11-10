@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.client.RestClient
 
 @RestController
 @RequestMapping("/test")
@@ -23,7 +22,6 @@ class TestController(
     @Autowired private val testService: TestService,
     @Autowired private val validationService: ValidationService,
 ) {
-
     @PostMapping
     fun createTest(
         @RequestBody testCaseRequest: ExecuteTest,
@@ -33,13 +31,14 @@ class TestController(
 //        if (!validationService.canModify(ownerId, testCaseRequest.snippetId.toLong())) {
 //            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 //        }
-        val testId: Long = testService.createTest(
-            testCaseRequest.id.toLong(),
-            ownerId,
-            testCaseRequest.name,
-            testCaseRequest.input,
-            testCaseRequest.output
-        )
+        val testId: Long =
+            testService.createTest(
+                testCaseRequest.id.toLong(),
+                ownerId,
+                testCaseRequest.name,
+                testCaseRequest.input,
+                testCaseRequest.output,
+            )
         return ResponseEntity.ok(testId)
     }
 
@@ -51,26 +50,31 @@ class TestController(
     ): String {
         val ownerId = request.getHeader("id").toLong()
         testService.editTest(test)
+        println("Edited test od id $id ")
         return "Edited"
     }
 
     @DeleteMapping("/{id}")
-    fun deleteTest(@PathVariable id: Long, request: HttpServletRequest,): String {
+    fun deleteTest(
+        @PathVariable id: Long,
+        request: HttpServletRequest,
+    ): String {
         val ownerId = request.getHeader("id").toLong()
         testService.deleteTest(id)
         return "Deleted"
     }
 
     @GetMapping("/{id}")
-    fun getTestById(@PathVariable id: Long,  request: HttpServletRequest): List<SnippetTest> {
+    fun getTestById(
+        @PathVariable id: Long,
+        request: HttpServletRequest,
+    ): List<SnippetTest> {
         val ownerId = request.getHeader("id").toLong()
         return testService.getAllTests(id)
     }
 
     @GetMapping
-    fun getUserTest(
-        request: HttpServletRequest,
-    ): List<SnippetTest> {
+    fun getUserTest(request: HttpServletRequest): List<SnippetTest> {
         val userId = request.getHeader("id").toLong()
         return testService.getUserTest(userId)
     }
@@ -84,12 +88,13 @@ class TestController(
         if (!validationService.canModify(ownerId, testCaseRequest.id.toLong())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
-        val testResult: Boolean = testService.executeTest(
-            testCaseRequest.id.toLong(),
-            testCaseRequest.name,
-            testCaseRequest.input,
-            testCaseRequest.output
-        )
+        val testResult: Boolean =
+            testService.executeTest(
+                testCaseRequest.id.toLong(),
+                testCaseRequest.name,
+                testCaseRequest.input,
+                testCaseRequest.output,
+            )
         val enum = if (testResult) "success" else "fail"
         return ResponseEntity.ok(enum)
     }
@@ -99,6 +104,5 @@ data class ExecuteTest(
     val id: String,
     val name: String,
     val input: List<String>,
-    val output: List<String>
+    val output: List<String>,
 )
-

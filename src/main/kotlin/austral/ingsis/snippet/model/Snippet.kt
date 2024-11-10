@@ -13,7 +13,7 @@ data class Snippet(
     val language: String,
     val ownerId: Long,
     val extension: String,
-    var status: ComplianceEnum
+    var status: ComplianceEnum,
 ) {
-    constructor() : this(0, "", "",  0, "", ComplianceEnum.PENDING)
+    constructor() : this(0, "", "", 0, "", ComplianceEnum.PENDING)
 }

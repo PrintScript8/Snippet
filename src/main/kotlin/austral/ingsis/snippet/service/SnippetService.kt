@@ -4,7 +4,6 @@ import austral.ingsis.snippet.exception.InvalidSnippetException
 import austral.ingsis.snippet.model.CommunicationSnippet
 import austral.ingsis.snippet.model.ComplianceEnum
 import austral.ingsis.snippet.model.Snippet
-import austral.ingsis.snippet.model.SnippetTest
 import austral.ingsis.snippet.repository.SnippetRepository
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -16,31 +15,33 @@ import org.springframework.web.client.RestClient
 class SnippetService(
     @Autowired final val restClientBuilder: RestClient.Builder,
     @Autowired final val snippetRepository: SnippetRepository,
-    @Autowired final val testService: TestService
+    @Autowired final val testService: TestService,
 ) {
     var bucketClient: RestClient = restClientBuilder.baseUrl("http://asset-service:8080").build()
     var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8080").build()
     val logger: Logger = LogManager.getLogger(SnippetService::class.java)
 
     fun getSnippetById(id: Long): CommunicationSnippet? {
-        val code = bucketClient.get()
-            .uri("/v1/asset/{container}/{key}", "snippet", id)
-            .retrieve()
-            .body(String::class.java)
+        val code =
+            bucketClient.get()
+                .uri("/v1/asset/{container}/{key}", "snippet", id)
+                .retrieve()
+                .body(String::class.java)
         val snippet: Snippet = snippetRepository.getReferenceById(id)
         if (code == null) {
             logger.info("Snippet with id $id not found")
             return null
         }
-        val communicationSnippet = CommunicationSnippet(
-            snippet.id,
-            snippet.name,
-            snippet.language,
-            snippet.ownerId,
-            code,
-            snippet.extension,
-            snippet.status
-        )
+        val communicationSnippet =
+            CommunicationSnippet(
+                snippet.id,
+                snippet.name,
+                snippet.language,
+                snippet.ownerId,
+                code,
+                snippet.extension,
+                snippet.status,
+            )
         logger.info("Snippet with id $id has been retrieved")
         return communicationSnippet
     }
@@ -50,11 +51,12 @@ class SnippetService(
         code: String,
         language: String,
         ownerId: Long,
-        extension: String
+        extension: String,
     ): Long {
-        val snippet: Snippet = snippetRepository.save(
-            Snippet(0, name, language, ownerId, extension, ComplianceEnum.PENDING)
-        )
+        val snippet: Snippet =
+            snippetRepository.save(
+                Snippet(0, name, language, ownerId, extension, ComplianceEnum.PENDING),
+            )
         val result =
             parserClient.put()
                 .uri("/parser/validate")
@@ -80,7 +82,7 @@ class SnippetService(
     fun updateSnippet(
         id: Long,
         code: String,
-        language: String
+        language: String,
     ) {
         val snippet: Snippet = snippetRepository.getReferenceById(id)
         snippet.status = ComplianceEnum.PENDING
@@ -116,14 +118,20 @@ class SnippetService(
         logger.info("Snippet with id $id has been deleted")
     }
 
-    fun paginatedSnippets(page: Int, pageSize: Int, snippetName: String): List<CommunicationSnippet> {
+    @Suppress("ReturnCount")
+    fun paginatedSnippets(
+        page: Int,
+        pageSize: Int,
+        snippetName: String,
+    ): List<CommunicationSnippet> {
         val snippets: List<Snippet> = snippetRepository.findAll()
         val output = mutableListOf<CommunicationSnippet>()
         for (snippet in snippets) {
-            val code = bucketClient.get()
-                .uri("/v1/asset/{container}/{key}", "snippet", snippet.id)
-                .retrieve()
-                .body(String::class.java)
+            val code =
+                bucketClient.get()
+                    .uri("/v1/asset/{container}/{key}", "snippet", snippet.id)
+                    .retrieve()
+                    .body(String::class.java)
             output.add(
                 CommunicationSnippet(
                     snippet.id,
@@ -132,8 +140,8 @@ class SnippetService(
                     snippet.ownerId,
                     code ?: "",
                     snippet.extension,
-                    snippet.status
-                )
+                    snippet.status,
+                ),
             )
         }
         if (snippetName.isNotEmpty()) {

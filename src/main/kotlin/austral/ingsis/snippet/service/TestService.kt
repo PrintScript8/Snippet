@@ -18,7 +18,13 @@ class TestService(
     var bucketClient: RestClient = restClientBuilder.baseUrl("http://asset-service:8080").build()
     var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8080").build()
 
-    fun createTest(snippetId: Long, ownerId: Long, name: String, inputs: List<String>, outputs: List<String>): Long {
+    fun createTest(
+        snippetId: Long,
+        ownerId: Long,
+        name: String,
+        inputs: List<String>,
+        outputs: List<String>,
+    ): Long {
         val test = snippetTestRepository.save(SnippetTest(0L, snippetId, ownerId, name, inputs, outputs))
         return test.testId
     }
@@ -43,22 +49,33 @@ class TestService(
         return snippetTestRepository.findAllByOwnerId(id)
     }
 
-    fun executeTest(testId: Long, name: String, input: List<String>, output: List<String>): Boolean {
+    fun executeTest(
+        testId: Long,
+        name: String,
+        input: List<String>,
+        output: List<String>,
+    ): Boolean {
         val snippetId = getTestById(testId).snippetId
         val snippet = snippetRepository.getReferenceById(snippetId)
         snippet.status = ComplianceEnum.PENDING
         snippetRepository.save(snippet)
-        val code = bucketClient.get()
-            .uri("/v1/asset/{container}/{key}", "snippet", snippetId)
-            .retrieve()
-            .body(kotlin.String::class.java)
-        if (code == null) { throw Exception("Snippet not found") }
-        val response: List<String> = parserClient.put()
-            .uri("/parser/test/execute")
-            .body(TestRequest(code, "printscript", input))
-            .retrieve()
-            .toEntity(object : ParameterizedTypeReference<List<String>>() {})
-            .body ?: throw Exception("Failed to parse response")
+        val code =
+            bucketClient.get()
+                .uri("/v1/asset/{container}/{key}", "snippet", snippetId)
+                .retrieve()
+                .body(kotlin.String::class.java)
+        if (code == null) {
+            throw NoSuchElementException(
+                "User with ID $snippetId not found",
+            )
+        }
+        val response: List<String> =
+            parserClient.put()
+                .uri("/parser/test/execute")
+                .body(TestRequest(code, "printscript", input))
+                .retrieve()
+                .toEntity(object : ParameterizedTypeReference<List<String>>() {})
+                .body ?: throw IllegalArgumentException("Failed to parse response of $name")
 
         if (response == output) {
             snippet.status = ComplianceEnum.COMPLIANT
@@ -73,4 +90,5 @@ class TestService(
         snippetTestRepository.deleteAllByOwnerId(id)
     }
 }
+
 data class TestRequest(val code: String, val language: String, val input: List<String>)

@@ -4,7 +4,8 @@ enum class ComplianceEnum {
     COMPLIANT,
     NON_COMPLIANT,
     PENDING,
-    FAILED;
+    FAILED,
+    ;
 
     override fun toString(): String {
         return name.lowercase()

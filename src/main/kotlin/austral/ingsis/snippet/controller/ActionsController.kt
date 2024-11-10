@@ -14,25 +14,22 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/actions")
 class ActionsController {
-
     private val logger = LogManager.getLogger(SnippetController::class.java)
 
     @PutMapping("/format")
     fun formatSnippet(
         @RequestBody code: CommunicationSnippet,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<String> {
         val userId = request.getHeader("id").toLong()
-        logger.error("Not implemented")
+        logger.error("Not implemented $code $userId")
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Not implemented")
     }
 
     @GetMapping("/type")
-    fun getType(
-        request: HttpServletRequest
-    ): ResponseEntity<List<FileType>> {
+    fun getType(request: HttpServletRequest): ResponseEntity<List<FileType>> {
         val userId = request.getHeader("id").toLong()
-        logger.info("Returning list of supported file types")
+        logger.info("Returning list of supported file types $userId")
         return ResponseEntity.ok().body(listOf(FileType("printscript", "prs")))
     }
 }

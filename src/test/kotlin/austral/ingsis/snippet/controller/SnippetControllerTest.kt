@@ -1,31 +1,7 @@
 package austral.ingsis.snippet.controller
 
-import austral.ingsis.snippet.model.CommunicationSnippet
-import austral.ingsis.snippet.model.ComplianceEnum
-import austral.ingsis.snippet.service.SnippetService
-import austral.ingsis.snippet.service.ValidationService
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.mockito.Mock
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestClient.RequestBodyUriSpec
-import kotlin.math.absoluteValue
 
 class SnippetControllerTest {
     /*
@@ -96,7 +72,8 @@ class SnippetControllerTest {
     @Test
     fun `should delete snippet by id`() {
         // Arrange
-        `when`(snippetService.getSnippetById(1)).thenReturn(CommunicationSnippet(1, "", "", 1, "", "", ComplianceEnum.COMPLIANT))
+        `when`(snippetService.getSnippetById(1)).thenReturn(
+        CommunicationSnippet(1, "", "", 1, "", "", ComplianceEnum.COMPLIANT))
         `when`(permissionClient.delete()).thenReturn(requestHeadersUriSpec)
         `when`(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec)
         `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
@@ -210,5 +187,5 @@ class SnippetControllerTest {
             snippet.language
         )
     }
-    */
+     */
 }

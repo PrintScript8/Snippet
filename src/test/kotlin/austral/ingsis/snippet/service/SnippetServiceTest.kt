@@ -1,8 +1,5 @@
 package austral.ingsis.snippet.service
 
-import austral.ingsis.snippet.model.CommunicationSnippet
-import austral.ingsis.snippet.model.ComplianceEnum
-import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.repository.SnippetRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,19 +9,17 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestClient.RequestBodyUriSpec
 
 class SnippetServiceTest {
     @Mock
     private lateinit var requestHeadersUriSpec: RestClient.RequestHeadersUriSpec<*>
 
-    @Mock
-    private lateinit var requestBodyUriSpec: RequestBodyUriSpec
+    //  @Mock
+    // private lateinit var requestBodyUriSpec: RequestBodyUriSpec
 
-    @Mock
-    private lateinit var requestBodySpec: RestClient.RequestBodySpec
+    // @Mock
+    // private lateinit var requestBodySpec: RestClient.RequestBodySpec
 
     @Mock
     private lateinit var requestHeadersSpec: RestClient.RequestHeadersSpec<*>
@@ -46,17 +41,22 @@ class SnippetServiceTest {
 
     private lateinit var snippetService: SnippetService
 
-    private val snippet = CommunicationSnippet(1L, "", "", 1L, "", "", ComplianceEnum.COMPLIANT)
+//    private val snippet = CommunicationSnippet(
+    //      1L, "", "", 1L, "", "", ComplianceEnum.COMPLIANT)
 
     @BeforeEach
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         `when`(builder.baseUrl(anyString())).thenReturn(builder)
         `when`(builder.build()).thenReturn(client)
-        snippetService = SnippetService(
-            builder, snippetRepository, testService
-        )
+        snippetService =
+            SnippetService(
+                builder,
+                snippetRepository,
+                testService,
+            )
     }
+
 /*
     @Test
     fun `should call the asset service to get snippet by id`() {
