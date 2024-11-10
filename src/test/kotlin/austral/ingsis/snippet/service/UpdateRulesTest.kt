@@ -17,7 +17,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
+
 class UpdateRulesTest {
     @Mock
     private lateinit var userRulesRepository: UserRulesRepository
@@ -25,7 +25,7 @@ class UpdateRulesTest {
     @Mock
     private lateinit var rulesRepository: RulesRepository
 
-    @InjectMocks
+    @Mock
     private lateinit var rulesService: RulesService
 
     private val userId = 1L
@@ -47,7 +47,7 @@ class UpdateRulesTest {
             )
 
         `when`(userRulesRepository.findByUserId(userId)).thenReturn(userRules)
-        `when`(rulesRepository.saveAll(any<List<Rule>>())).thenReturn(formattingRules)
+        `when`(rulesRepository.saveAll(formattingRules)).thenReturn(formattingRules)
         `when`(rulesRepository.findAllById(userRules.allRules)).thenReturn(formattingRules)
 
         // Act
@@ -57,7 +57,7 @@ class UpdateRulesTest {
         println(result)
 
         verify(userRulesRepository).save(eq(userRules))
-        // verify(rulesRepository).saveAll(any())
+        //verify(rulesRepository).saveAll(any())
     }
 
     @Test

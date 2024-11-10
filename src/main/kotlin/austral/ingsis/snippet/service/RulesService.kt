@@ -89,14 +89,14 @@ class RulesService(
                 }
         }
         userRulesRepository.save(userRules)
-        val rules: List<Rule> = rulesRepository.findAllById(userRules.allRules)
+        val ruleList: List<Rule> = rulesRepository.findAllById(userRules.allRules)
         return when (configType) {
             ConfigType.FORMATTING -> {
-                val formatRules = rules.filter { it.type == configType }
+                val formatRules = ruleList.filter { it.type == configType }
                 convertFormatToJson(formatRules)
             }
             ConfigType.LINTING -> {
-                val lintRules = rules.filter { it.type == configType }
+                val lintRules = ruleList.filter { it.type == configType }
                 convertLintingToJson(lintRules)
             }
         }
