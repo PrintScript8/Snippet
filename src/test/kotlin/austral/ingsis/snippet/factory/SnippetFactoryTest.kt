@@ -1,6 +1,6 @@
 package austral.ingsis.snippet.factory
 
-import austral.ingsis.snippet.model.Snippet
+import austral.ingsis.snippet.model.CommunicationSnippet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -16,26 +16,26 @@ class SnippetFactoryTest {
 
         // Act
         val snippet =
-            Snippet(
+            CommunicationSnippet(
                 1L,
                 name,
                 description,
-                code,
                 language,
                 ownerId,
+                code,
             )
 
         // Assert
         assertEquals(name, snippet.name)
         assertEquals(description, snippet.description)
-        assertEquals(code, snippet.code)
+        assertEquals(code, snippet.content)
         assertEquals(language, snippet.language)
         assertEquals(ownerId, snippet.ownerId)
     }
 
     @Test
     fun `should create empty snippet`() {
-        val emptySnippet = Snippet(1L, "", "", "", "", 0L)
+        val emptySnippet = CommunicationSnippet(1L, "", "", "", 0L, "")
 
         val expectedName = ""
         val expectedDescription = ""
@@ -46,7 +46,7 @@ class SnippetFactoryTest {
         // Assert
         assertEquals(expectedName, emptySnippet.name)
         assertEquals(expectedDescription, emptySnippet.description)
-        assertEquals(expectedCode, emptySnippet.code)
+        assertEquals(expectedCode, emptySnippet.content)
         assertEquals(expectedLanguage, emptySnippet.language)
         assertEquals(expectedOwnerId, emptySnippet.ownerId)
     }

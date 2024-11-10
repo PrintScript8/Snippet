@@ -1,7 +1,8 @@
 package austral.ingsis.snippet.controller
 
-import austral.ingsis.snippet.model.Snippet
+import austral.ingsis.snippet.model.CommunicationSnippet
 import austral.ingsis.snippet.service.SnippetService
+import austral.ingsis.snippet.service.ValidationService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
@@ -25,7 +26,7 @@ import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClient.RequestBodyUriSpec
 import kotlin.math.absoluteValue
 
-class SnippetPetitionControllerTest {
+class SnippetControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @Mock
@@ -52,14 +53,17 @@ class SnippetPetitionControllerTest {
     @Mock
     private lateinit var requestHeadersSpec: RestClient.RequestHeadersSpec<*>
 
-    private lateinit var controller: SnippetPetitionController
+    @Mock
+    private lateinit var validationService: ValidationService
+
+    private lateinit var controller: SnippetController
 
     @BeforeEach
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         `when`(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder)
         `when`(clientBuilder.build()).thenReturn(permissionClient)
-        controller = SnippetPetitionController(snippetService, clientBuilder)
+        controller = SnippetController(snippetService, clientBuilder, validationService)
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
     }
 
@@ -67,13 +71,13 @@ class SnippetPetitionControllerTest {
     fun `should return snippet by id`() {
         // Arrange
         val snippet =
-            Snippet(
+            CommunicationSnippet(
                 1L,
                 "First Snippet",
                 "First Description",
-                "First Code",
                 "First Language",
                 1L,
+                "First Code",
             )
         `when`(snippetService.getSnippetById(1)).thenReturn(snippet)
 
@@ -89,7 +93,7 @@ class SnippetPetitionControllerTest {
     @Test
     fun `should delete snippet by id`() {
         // Arrange
-        `when`(snippetService.getSnippetById(1)).thenReturn(Snippet(1, "", "", "", "", 1))
+        `when`(snippetService.getSnippetById(1)).thenReturn(CommunicationSnippet(1, "", "", "", 1, ""))
         `when`(permissionClient.delete()).thenReturn(requestHeadersUriSpec)
         `when`(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec)
         `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
@@ -106,22 +110,22 @@ class SnippetPetitionControllerTest {
     fun `should create snippet successfully`() {
         // Arrange
         val snippet =
-            Snippet(
+            CommunicationSnippet(
                 0L,
                 "First Snippet",
                 "First Description",
-                "First Code",
                 "First Language",
                 1L,
+                "First Code",
             )
-        val id = (snippet.name + snippet.code + snippet.description).hashCode().toLong().absoluteValue
+        val id = (snippet.name + snippet.content + snippet.description).hashCode().toLong().absoluteValue
 
         // Mock service and client behavior
         doNothing().`when`(snippetService).updateSnippet(
             id,
             snippet.name,
             snippet.description,
-            snippet.code,
+            snippet.content,
             snippet.language,
             snippet.ownerId,
         )
@@ -156,7 +160,7 @@ class SnippetPetitionControllerTest {
             id,
             snippet.name,
             snippet.description,
-            snippet.code,
+            snippet.content,
             snippet.language,
             snippet.ownerId,
         )
@@ -169,19 +173,19 @@ class SnippetPetitionControllerTest {
     fun `should update snippet`() {
         // Arrange
         val snippet =
-            Snippet(
+            CommunicationSnippet(
                 1L,
                 "First Snippet",
                 "First Description",
-                "First Code",
                 "First Language",
                 1L,
+                "First Code",
             )
         doNothing().`when`(snippetService).updateSnippet(
             1,
             snippet.name,
             snippet.description,
-            snippet.code,
+            snippet.content,
             snippet.language,
             snippet.ownerId,
         )
@@ -208,7 +212,7 @@ class SnippetPetitionControllerTest {
             1,
             snippet.name,
             snippet.description,
-            snippet.code,
+            snippet.content,
             snippet.language,
             snippet.ownerId,
         )

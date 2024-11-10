@@ -8,7 +8,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -16,7 +15,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
-class SnippetAsyncControllerTest {
+class SnippetConfigControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @Mock
@@ -25,12 +24,12 @@ class SnippetAsyncControllerTest {
     @Mock
     lateinit var messageEmitter: RedisMessageEmitter
 
-    private lateinit var controller: SnippetAsyncController
+    private lateinit var controller: SnippetConfigController
 
     @BeforeEach
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        controller = SnippetAsyncController(rulesService, messageEmitter)
+        controller = SnippetConfigController(rulesService, messageEmitter)
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
     }
 

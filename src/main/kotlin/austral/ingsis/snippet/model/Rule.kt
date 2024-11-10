@@ -5,15 +5,17 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 
 @Entity
-data class Snippet(
+data class Rule(
     @Id
     @GeneratedValue
     val id: Long,
     val name: String,
-    val language: String,
-    val ownerId: Long,
-    val extension: String,
-    var status: ComplianceEnum
+    val isActive: Boolean,
+    val value: String?,
+//    val type: ConfigType
 ) {
-    constructor() : this(0, "", "",  0, "", ComplianceEnum.PENDING)
+    constructor() : this(0L, "", false, "")
 }
+
+// todo: Agregar to String
+// todo: Manejar cambio de rule a type

@@ -1,6 +1,8 @@
 package austral.ingsis.snippet.service
 
+import austral.ingsis.snippet.model.CommunicationSnippet
 import austral.ingsis.snippet.model.Snippet
+import austral.ingsis.snippet.repository.SnippetRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
@@ -35,16 +37,19 @@ class SnippetServiceTest {
     @Mock
     private lateinit var builder: RestClient.Builder
 
+    @Mock
+    private lateinit var snippetRepository: SnippetRepository
+
     private lateinit var snippetService: SnippetService
 
-    private val snippet = Snippet(1L, "name", "description", "code", "language", 1L)
+    private val snippet = CommunicationSnippet(1L, "name", "description", "language", 1L, "code")
 
     @BeforeEach
     fun setUp() {
         MockitoAnnotations.openMocks(this)
         `when`(builder.baseUrl(anyString())).thenReturn(builder)
         `when`(builder.build()).thenReturn(client)
-        snippetService = SnippetService(builder)
+        snippetService = SnippetService(builder, snippetRepository)
     }
 
     @Test
@@ -53,7 +58,7 @@ class SnippetServiceTest {
         `when`(client.get()).thenReturn(requestHeadersUriSpec)
         `when`(requestHeadersUriSpec.uri("/v1/asset/{container}/{key}", "snippet", 1L)).thenReturn(requestHeadersSpec)
         `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(Snippet::class.java)).thenReturn(snippet)
+        `when`(responseSpec.body(CommunicationSnippet::class.java)).thenReturn(snippet)
 
         // Call the service method
         snippetService.getSnippetById(1L)
