@@ -124,17 +124,15 @@ class SnippetController(
     fun paginatedSnippets(
         page: Int,
         pageSize: Int,
-        snippetName: String?
-    ): ResponseEntity<List<PaginationSnippet>> {
-        val snippets: List<CommunicationSnippet> = snippetService.paginatedSnippets(page, pageSize, snippetName ?: "")
-        val paginatedSnippets = snippets.chunked(pageSize).mapIndexed { index, chunk ->
-            PaginationSnippet(
-                page = index,
-                pageSize = pageSize,
-                count = snippets.size,
-                snippets = chunk
-            )
+        snippetName: String?,
+        request: HttpServletRequest
+    ): ResponseEntity<PaginationSnippet> {
+        val userId = request.getHeader("id").toLong()
+        if (!validationService.exists(userId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
         }
+        val snippets: List<CommunicationSnippet> = snippetService.paginatedSnippets(page, pageSize, snippetName ?: "")
+        val paginatedSnippets = PaginationSnippet(page, pageSize, snippets.size, snippets.filter { validationService.canRead(userId, it.id!!) })
         logger.info("Returning paginated snippets: $paginatedSnippets")
         return ResponseEntity.status(HttpStatus.OK).body(paginatedSnippets)
     }

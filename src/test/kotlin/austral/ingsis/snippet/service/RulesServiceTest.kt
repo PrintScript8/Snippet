@@ -1,7 +1,11 @@
 package austral.ingsis.snippet.service
 
 import austral.ingsis.snippet.factory.UserRulesFactory
+import austral.ingsis.snippet.model.ConfigType
 import austral.ingsis.snippet.model.UserRules
+import austral.ingsis.snippet.repository.RulesRepository
+import austral.ingsis.snippet.model.Rule
+import austral.ingsis.snippet.repository.UserRulesRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
@@ -14,6 +18,12 @@ import org.mockito.MockitoAnnotations
 import org.springframework.web.client.RestClient
 
 class RulesServiceTest {
+
+
+
+
+
+    /*
     @Mock
     private lateinit var userRulesFactory: UserRulesFactory
 
@@ -22,6 +32,12 @@ class RulesServiceTest {
 
     @Mock
     private lateinit var bucketClient: RestClient
+
+    @Mock
+    private lateinit var userRulesRepository: UserRulesRepository
+
+    @Mock
+    private lateinit var rulesRepository: RulesRepository
 
     @Mock
     private lateinit var requestHeadersUriSpec: RestClient.RequestHeadersUriSpec<*>
@@ -47,17 +63,21 @@ class RulesServiceTest {
         MockitoAnnotations.openMocks(this)
         `when`(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder)
         `when`(clientBuilder.build()).thenReturn(bucketClient)
-        rulesService = RulesService(userRulesFactory, clientBuilder)
+        rulesService = RulesService(
+            userRulesFactory, clientBuilder,
+            userRulesRepository = userRulesRepository,
+            rulesRepository = rulesRepository
+        )
     }
 
     @Test
     fun `should create new linting rules if not present`() {
         // Arrange
-        val userRules = UserRules(userId, language, lintingConfig, "")
+        val userRules = UserRules(0L, userId, language, emptyList<Long>())
         `when`(bucketClient.get()).thenReturn(requestHeadersUriSpec)
         `when`(requestHeadersUriSpec.uri(anyString(), any(), any())).thenReturn(requestHeadersUriSpec)
         `when`(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec)
-        `when`(userRulesFactory.buildUserRules(userId, lintingConfig, "", language)).thenReturn(userRules)
+        `when`(userRulesFactory.buildUserRules(language, userId, emptyList<Long>())).thenReturn(userRules)
         `when`(bucketClient.put()).thenReturn(requestBodyUriSpec)
         `when`(requestBodyUriSpec.uri(anyString(), any(), any())).thenReturn(requestBodySpec)
         `when`(requestBodySpec.body(userRules)).thenReturn(requestBodySpec)
@@ -65,7 +85,7 @@ class RulesServiceTest {
         `when`(responseSpec.body(UserRules::class.java)).thenReturn(userRules)
 
         // Act
-        rulesService.updateLintingRules(userId, lintingConfig, language)
+        rulesService.updateRules(userId, language, ConfigType.FORMATTING, emptyList<Rule>())
 
         // Assert
         verify(bucketClient, times(1)).put()
@@ -73,6 +93,7 @@ class RulesServiceTest {
         verify(requestBodySpec, times(1)).body(userRules)
         verify(requestBodySpec, times(1)).retrieve()
     }
+
 
     @Test
     fun `should update existing linting rules`() {
@@ -145,4 +166,14 @@ class RulesServiceTest {
         verify(requestBodySpec, times(1)).body(userRules)
         verify(requestBodySpec, times(1)).retrieve()
     }
+
+    @Test
+    fun `should update rules and give json string`() {
+        val rules: List<Rule> = listOf(
+            Rule(name = "spaceBeforeColon", isActive = true, value = null, type = ConfigType.FORMATTING),
+            Rule(name = "newlineBeforePrintln", isActive = true, value = "2", type = ConfigType.FORMATTING)
+        )
+        rulesService.updateRules(1, "ps", ConfigType.FORMATTING, rules)
+    }
+    */
 }

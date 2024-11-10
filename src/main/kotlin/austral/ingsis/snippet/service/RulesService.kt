@@ -26,29 +26,27 @@ class RulesService(
         configType: ConfigType,
     ): List<Rule> {
         val userRules = userRulesRepository.findByUserId(userId) ?: throw Exception("User not found")
-        return when (configType) {
-            ConfigType.FORMATTING -> rulesRepository.findAllById(userRules.formattingRules)
-            ConfigType.LINTING -> rulesRepository.findAllById(userRules.lintingRules)
-        }
-        // Todo: Modificar para filtrar con la coleccion de ambos tipos de reglas
-    }
+        val rules: List<Rule> = rulesRepository.findAllById(userRules.allRules)
+        val output = rules.filter { it.type == configType }
+        return output}
 
     fun createRules(userId: Long, language: String) {
         val formattingRules = listOf(
-            Rule(0L, "spaceBeforeColon", false, null),
-            Rule(0L, "spaceAfterColon", false, null),
-            Rule(0L, "spaceAroundEquals", false, null),
-            Rule(0L,"newlineBeforePrintln", false, "0")
+            Rule(0L, "spaceBeforeColon", false, null, ConfigType.FORMATTING),
+            Rule(0L, "spaceAfterColon", false, null, ConfigType.FORMATTING),
+            Rule(0L, "spaceAroundEquals", false, null, ConfigType.FORMATTING),
+            Rule(0L,"newlineBeforePrintln", false, "0", ConfigType.FORMATTING)
         )
         val lintingRules = listOf(
-            Rule(0L ,"identifier_format", false, "camel case")
-            // todo: Agregar Linting rule que falta de PrintScript
+            Rule(0L ,"identifier_format", false, "camel case", ConfigType.LINTING),
+            Rule(0L, "mandatory-variable-or-literal-in-println", false, null, ConfigType.LINTING),
+            Rule(0L, "mandatory-variable-or-literal-in-readInput", false, null, ConfigType.LINTING)
         )
         val formatting: List<Rule> = rulesRepository.saveAll(formattingRules)
         val linting: List<Rule> = rulesRepository.saveAll(lintingRules)
         val formattingId: List<Long> = formatting.map { it.id }
         val lintingId: List<Long> = linting.map { it.id }
-        val user: UserRules = userRulesFactory.buildUserRules(language, userId, formattingId, lintingId)
+        val user: UserRules = userRulesFactory.buildUserRules(language, userId, formattingId + lintingId)
         logger.info(user)
         userRulesRepository.save(user)
     }
@@ -56,21 +54,49 @@ class RulesService(
     fun updateRules(userId: Long, language: String, configType: ConfigType, rules: List<Rule>): String {
         val userRules = userRulesRepository.findByUserId(userId) ?: throw Exception("User not found")
         val rulesIds = rulesRepository.saveAll(rules).map { it.id }
-        // todo: Hacer que se mantenga el orden de las reglas
-        when (configType) {
-            ConfigType.FORMATTING -> {
-                userRules.formattingRules = rulesIds
-            }
-            ConfigType.LINTING -> {
-                userRules.lintingRules = rulesIds
+        for (id in rulesIds) {
+            if(!userRules.allRules.contains(id)){
+                userRules.allRules.plus(id)
             }
         }
         userRulesRepository.save(userRules)
-        // todo: Manejar que esto retorne el JSON en string
-        return ""
+        val rules: List<Rule> = rulesRepository.findAllById(userRules.allRules)
+        if(configType == ConfigType.FORMATTING){
+            val formatRules = rules.filter { it.type == configType }
+            return convertFormatToJson(formatRules)
+        }
+        else if (configType == ConfigType.LINTING){
+            val lintRules = rules.filter { it.type == configType }
+            return convertLintingToJson(lintRules)
+        }
+        else {
+            throw IllegalStateException("Invalid config type recieved")
+        }
     }
 
-    private fun convertToJson() {
-        // todo: Tener en cuenta que formating y linting reciben jsons distintos
+    private fun convertFormatToJson(rules: List<Rule>): String {
+        // Use StringBuilder for efficient string concatenation
+        val result = StringBuilder("{ \"rules\": { ")
+
+        // Iterate over rules and append each rule's JSON string
+        rules.forEachIndexed { index, rule ->
+            result.append(rule.toString())
+            if (index < rules.size - 1) result.append(", ")
+        }
+
+        result.append(" } }")
+        return result.toString()
+    }
+
+    private fun convertLintingToJson(rules: List<Rule>): String {
+        val result = StringBuilder("{ ")
+
+        rules.forEachIndexed { index, rule ->
+            result.append(rule.toString())
+            if (index < rules.size - 1) result.append(", ")
+        }
+
+        result.append(" }")
+        return result.toString()
     }
 }

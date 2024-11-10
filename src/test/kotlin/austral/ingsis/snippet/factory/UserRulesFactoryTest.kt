@@ -18,7 +18,6 @@ class UserRulesFactoryTest {
         // Arrange
         val userId = 1L
         val language = "kotlin"
-        val lintingConfig = "some-linting-config"
         val formattingConfig = "some-formatting-config"
 
         // Act
@@ -26,14 +25,11 @@ class UserRulesFactoryTest {
             userRulesFactory.buildUserRules(
                 userId = userId,
                 language = language,
-                lintingConfig = lintingConfig,
-                formattingConfig = formattingConfig,
+                allRules = emptyList<Long>()
             )
 
         // Assert
         assertEquals(userId, userRules.userId)
         assertEquals(language, userRules.language)
-        assertEquals(lintingConfig, userRules.lintingConfig)
-        assertEquals(formattingConfig, userRules.formattingConfig)
-    }
+        assertEquals(emptyList<Long>(), userRules.allRules) }
 }

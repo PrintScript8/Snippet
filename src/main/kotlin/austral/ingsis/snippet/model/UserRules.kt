@@ -13,11 +13,7 @@ data class UserRules(
     val userId: Long,
     val language: String,
     @ElementCollection
-    var lintingRules: List<Long>,
-    @ElementCollection
-    var formattingRules: List<Long>,
+    var allRules: List<Long>
 ) {
-    constructor() : this(0L, 0L, "", emptyList(), emptyList())
+    constructor() : this(0L, 0L, "", emptyList())
 }
-
-// todo: Merge formating and linting rules to just one collection

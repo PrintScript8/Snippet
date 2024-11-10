@@ -1,8 +1,11 @@
 package austral.ingsis.snippet.message
 
-data class ExecuteRequest(
-    val ownerId: Long,
-    val language: String,
-    val rules: String,
-    val action: String,
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+
+data class ExecuteRequest @JsonCreator constructor(
+    @JsonProperty("ownerId") val ownerId: Long,
+    @JsonProperty("language") val language: String,
+    @JsonProperty("rules") val rules: String,
+    @JsonProperty("action") val action: String
 )
