@@ -1,108 +1,158 @@
 package austral.ingsis.snippet.service
 
+import austral.ingsis.snippet.model.ComplianceEnum
 import austral.ingsis.snippet.model.Snippet
-import org.junit.jupiter.api.BeforeEach
+import austral.ingsis.snippet.repository.SnippetRepository
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mock
+import org.mockito.Mockito.any
+import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import org.springframework.http.ResponseEntity
-import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestClient.RequestBodyUriSpec
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.test.web.client.ExpectedCount
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
+@RestClientTest(SnippetService::class)
 class SnippetServiceTest {
-    @Mock
-    private lateinit var requestHeadersUriSpec: RestClient.RequestHeadersUriSpec<*>
-
-    @Mock
-    private lateinit var requestBodyUriSpec: RequestBodyUriSpec
-
-    @Mock
-    private lateinit var requestBodySpec: RestClient.RequestBodySpec
-
-    @Mock
-    private lateinit var requestHeadersSpec: RestClient.RequestHeadersSpec<*>
-
-    @Mock
-    private lateinit var responseSpec: RestClient.ResponseSpec
-
-    @Mock
-    private lateinit var client: RestClient
-
-    @Mock
-    private lateinit var builder: RestClient.Builder
-
+    @Autowired
     private lateinit var snippetService: SnippetService
 
-    private val snippet = Snippet(1L, "name", "description", "code", "language", 1L)
+    @MockBean
+    private lateinit var snippetRepository: SnippetRepository
 
-    @BeforeEach
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        `when`(builder.baseUrl(anyString())).thenReturn(builder)
-        `when`(builder.build()).thenReturn(client)
-        snippetService = SnippetService(builder)
+    @MockBean
+    private lateinit var testService: TestService
+
+    @Autowired
+    private lateinit var mockServer: MockRestServiceServer
+
+    @Test
+    fun `test getSnippetById`() {
+        val snippetId = 1L
+        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", 1L, "kt", ComplianceEnum.PENDING)
+        `when`(snippetRepository.getReferenceById(snippetId)).thenReturn(snippet)
+
+        mockServer.expect(ExpectedCount.once(), requestTo("http://asset-service:8080/v1/asset/snippet/$snippetId"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("fun main() {}", MediaType.TEXT_PLAIN))
+
+        val result = snippetService.getSnippetById(snippetId)
+
+        assertNotNull(result)
+        assertEquals(snippetId, result?.id)
+        assertEquals("fun main() {}", result?.content)
     }
 
     @Test
-    fun `should call the asset service to get snippet by id`() {
-        // Mocking method calls for HTTP request flow
-        `when`(client.get()).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.uri("/v1/asset/{container}/{key}", "snippet", 1L)).thenReturn(requestHeadersSpec)
-        `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(Snippet::class.java)).thenReturn(snippet)
+    fun `test createSnippet`() {
+        val snippetId = 1L
+        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", 1L, "kt", ComplianceEnum.PENDING)
+        `when`(snippetRepository.save(any(Snippet::class.java))).thenReturn(snippet)
 
-        // Call the service method
-        snippetService.getSnippetById(1L)
+        mockServer.expect(ExpectedCount.once(), requestTo("http://parser-service:8080/parser/validate"))
+            .andExpect(method(HttpMethod.PUT))
+            .andRespond(withStatus(HttpStatus.OK))
 
-        // Verify interactions
-        verify(client, times(1)).get()
-        verify(requestHeadersUriSpec, times(1)).uri("/v1/asset/{container}/{key}", "snippet", 1L)
-        verify(requestHeadersSpec, times(1)).retrieve()
-        verify(responseSpec, times(1)).body(Snippet::class.java)
+        mockServer.expect(ExpectedCount.once(), requestTo("http://asset-service:8080/v1/asset/snippet/$snippetId"))
+            .andExpect(method(HttpMethod.PUT))
+            .andRespond(withStatus(HttpStatus.OK))
+
+        val result = snippetService.createSnippet("Test Snippet", "fun main() {}", "Kotlin", 1L, "kt")
+
+        assertEquals(snippetId, result)
     }
 
     @Test
-    fun `should call the asset service to delete snippet`() {
-        // Mocking method calls for HTTP request flow
-        `when`(client.delete()).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.uri("/v1/asset/{container}/{key}", "snippet", 1L)).thenReturn(requestHeadersSpec)
-        `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(Void::class.java)).thenReturn(null)
+    fun `test updateSnippet`() {
+        val snippetId = 1L
+        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", 1L, "kt", ComplianceEnum.PENDING)
+        `when`(snippetRepository.getReferenceById(snippetId)).thenReturn(snippet)
 
-        // Call the service method
-        snippetService.deleteSnippet(1L)
+        mockServer.expect(ExpectedCount.once(), requestTo("http://parser-service:8080/parser/validate"))
+            .andExpect(method(HttpMethod.PUT))
+            .andRespond(withStatus(HttpStatus.OK))
 
-        // Verify interactions
-        verify(client, times(1)).delete()
-        verify(requestHeadersUriSpec, times(1)).uri("/v1/asset/{container}/{key}", "snippet", 1L)
-        verify(requestHeadersSpec, times(1)).retrieve()
-        verify(responseSpec, times(1)).body(Void::class.java)
+        mockServer.expect(ExpectedCount.once(), requestTo("http://asset-service:8080/v1/asset/snippet/$snippetId"))
+            .andExpect(method(HttpMethod.PUT))
+            .andRespond(withStatus(HttpStatus.OK))
+
+        snippetService.updateSnippet(snippetId, "fun main() {}", "Kotlin")
+
+        verify(snippetRepository, times(2)).save(snippet)
     }
 
     @Test
-    fun `should call the asset service to update snippet`() {
-        // Mocking method calls for HTTP request flow
-        `when`(client.put()).thenReturn(requestBodyUriSpec)
-        `when`(requestBodyUriSpec.uri("/v1/asset/{container}/{key}", "snippet", 1L)).thenReturn(requestBodySpec)
-        `when`(requestBodyUriSpec.uri("/parser/validate")).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.body(snippet)).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.toBodilessEntity()).thenReturn(ResponseEntity.ok().build())
+    fun `test deleteSnippet`() {
+        val snippetId = 1L
 
-        // Call the service method
-        snippetService.updateSnippet(1L, "name", "description", "code", "language", 1L)
+        mockServer.expect(ExpectedCount.once(), requestTo("http://asset-service:8080/v1/asset/snippet/$snippetId"))
+            .andExpect(method(HttpMethod.DELETE))
+            .andRespond(withStatus(HttpStatus.OK))
 
-        // Verify interactions
-        verify(client, times(2)).put()
-        verify(requestBodyUriSpec, times(1)).uri("/v1/asset/{container}/{key}", "snippet", 1L)
-        verify(requestBodySpec, times(2)).body(snippet)
-        verify(requestBodySpec, times(2)).retrieve()
-        verify(responseSpec, times(1)).body(Snippet::class.java)
-        verify(responseSpec, times(1)).toBodilessEntity()
-        verify(requestBodyUriSpec, times(1)).uri("/parser/validate")
+        doNothing().`when`(snippetRepository).deleteById(snippetId)
+        doNothing().`when`(testService).deleteAllTests(snippetId)
+
+        snippetService.deleteSnippet(snippetId)
+
+        verify(snippetRepository, times(1)).deleteById(snippetId)
+        verify(testService, times(1)).deleteAllTests(snippetId)
+    }
+
+    @Test
+    fun `test setSnippetStatus to non-compliant`() {
+        val snippetId = 2L
+        val snippet = Snippet(snippetId, "Test Snippet 2", "Kotlin", 2L, "kt", ComplianceEnum.PENDING)
+        `when`(snippetRepository.getReferenceById(snippetId)).thenReturn(snippet)
+
+        snippetService.setSnippetStatus(snippetId, "non-compliant")
+
+        assertEquals(ComplianceEnum.NON_COMPLIANT, snippet.status)
+        verify(snippetRepository, times(1)).saveAndFlush(snippet)
+    }
+
+    @Test
+    fun `test setSnippetStatus to failed`() {
+        val snippetId = 3L
+        val snippet = Snippet(snippetId, "Test Snippet 3", "Kotlin", 3L, "kt", ComplianceEnum.PENDING)
+        `when`(snippetRepository.getReferenceById(snippetId)).thenReturn(snippet)
+
+        snippetService.setSnippetStatus(snippetId, "failed")
+
+        assertEquals(ComplianceEnum.FAILED, snippet.status)
+        verify(snippetRepository, times(1)).saveAndFlush(snippet)
+    }
+
+    @Test
+    fun `test paginatedSnippets`() {
+        val snippet1 = Snippet(1L, "Snippet 1", "Kotlin", 1L, "kt", ComplianceEnum.COMPLIANT)
+        val snippet2 = Snippet(2L, "Snippet 2", "Kotlin", 1L, "kt", ComplianceEnum.COMPLIANT)
+        val snippets = listOf(snippet1, snippet2)
+        `when`(snippetRepository.findAll()).thenReturn(snippets)
+
+        mockServer.expect(ExpectedCount.once(), requestTo("http://asset-service:8080/v1/asset/snippet/1"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("fun main() {}", MediaType.TEXT_PLAIN))
+
+        mockServer.expect(ExpectedCount.once(), requestTo("http://asset-service:8080/v1/asset/snippet/2"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("fun main() {}", MediaType.TEXT_PLAIN))
+
+        val result = snippetService.paginatedSnippets(0, 2, "")
+
+        assertEquals(2, result.size)
+        assertEquals("Snippet 1", result[0].name)
+        assertEquals("Snippet 2", result[1].name)
     }
 }

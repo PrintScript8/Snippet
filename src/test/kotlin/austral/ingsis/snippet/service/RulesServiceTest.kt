@@ -1,148 +1,116 @@
 package austral.ingsis.snippet.service
 
 import austral.ingsis.snippet.factory.UserRulesFactory
+import austral.ingsis.snippet.model.ConfigType
+import austral.ingsis.snippet.model.Rule
 import austral.ingsis.snippet.model.UserRules
+import austral.ingsis.snippet.repository.RulesRepository
+import austral.ingsis.snippet.repository.UserRulesRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mock
-import org.mockito.Mockito.any
+import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.anyList
+import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
-import org.mockito.Mockito.times
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
 import org.springframework.web.client.RestClient
 
 class RulesServiceTest {
-    @Mock
-    private lateinit var userRulesFactory: UserRulesFactory
-
-    @Mock
-    private lateinit var clientBuilder: RestClient.Builder
-
-    @Mock
-    private lateinit var bucketClient: RestClient
-
-    @Mock
-    private lateinit var requestHeadersUriSpec: RestClient.RequestHeadersUriSpec<*>
-
-    @Mock
-    private lateinit var requestBodyUriSpec: RestClient.RequestBodyUriSpec
-
-    @Mock
-    private lateinit var requestBodySpec: RestClient.RequestBodySpec
-
-    @Mock
-    private lateinit var responseSpec: RestClient.ResponseSpec
-
     private lateinit var rulesService: RulesService
-
-    private val userId = 1L
-    private val language = "kotlin"
-    private val lintingConfig = "lintingConfig"
-    private val formattingConfig = "formattingConfig"
+    private lateinit var userRulesFactory: UserRulesFactory
+    private lateinit var clientBuilder: RestClient.Builder
+    private lateinit var userRulesRepository: UserRulesRepository
+    private lateinit var rulesRepository: RulesRepository
 
     @BeforeEach
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        `when`(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder)
-        `when`(clientBuilder.build()).thenReturn(bucketClient)
-        rulesService = RulesService(userRulesFactory, clientBuilder)
+        userRulesFactory = mock(UserRulesFactory::class.java)
+        clientBuilder = mock(RestClient.Builder::class.java)
+        userRulesRepository = mock(UserRulesRepository::class.java)
+        rulesRepository = mock(RulesRepository::class.java)
+
+        rulesService = RulesService(userRulesFactory, userRulesRepository, rulesRepository)
     }
 
     @Test
-    fun `should create new linting rules if not present`() {
-        // Arrange
-        val userRules = UserRules(userId, language, lintingConfig, "")
-        `when`(bucketClient.get()).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.uri(anyString(), any(), any())).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec)
-        `when`(userRulesFactory.buildUserRules(userId, lintingConfig, "", language)).thenReturn(userRules)
-        `when`(bucketClient.put()).thenReturn(requestBodyUriSpec)
-        `when`(requestBodyUriSpec.uri(anyString(), any(), any())).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.body(userRules)).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(UserRules::class.java)).thenReturn(userRules)
+    fun `test getRules returns correct rules based on config type`() {
+        val userId = 1L
+        val configType = ConfigType.FORMATTING
+        val userRules = UserRules(0L, userId, "java", listOf(1L, 2L))
+        val rule1 = Rule(1L, "spaceBeforeColon", false, null, ConfigType.FORMATTING)
+        val rule2 = Rule(2L, "mandatory-variable-or-literal-in-println", false, null, ConfigType.LINTING)
 
-        // Act
-        rulesService.updateLintingRules(userId, lintingConfig, language)
+        `when`(userRulesRepository.findByUserId(userId)).thenReturn(userRules)
+        `when`(rulesRepository.findAllById(userRules.allRules)).thenReturn(listOf(rule1, rule2))
 
-        // Assert
-        verify(bucketClient, times(1)).put()
-        verify(requestBodyUriSpec, times(1)).uri(anyString(), any(), any())
-        verify(requestBodySpec, times(1)).body(userRules)
-        verify(requestBodySpec, times(1)).retrieve()
+        val result = rulesService.getRules(userId, configType)
+        assert(result == listOf(rule1)) // Only formatting rule should be returned
     }
 
     @Test
-    fun `should update existing linting rules`() {
-        // Arrange
-        val userRules = UserRules(userId, language, "", "")
-        `when`(bucketClient.get()).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.uri(anyString(), any(), any())).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(UserRules::class.java)).thenReturn(userRules)
-        `when`(bucketClient.put()).thenReturn(requestBodyUriSpec)
-        `when`(requestBodyUriSpec.uri(anyString(), any(), any())).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.body(userRules)).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(UserRules::class.java)).thenReturn(userRules)
+    fun `test getRules throws exception if user not found`() {
+        val userId = 1L
+        `when`(userRulesRepository.findByUserId(userId)).thenReturn(null)
 
-        // Act
-        rulesService.updateLintingRules(userId, lintingConfig, language)
-
-        // Assert
-        verify(bucketClient, times(1)).put()
-        verify(requestBodyUriSpec, times(1)).uri(anyString(), any(), any())
-        verify(requestBodySpec, times(1)).body(userRules)
-        verify(requestBodySpec, times(1)).retrieve()
+        assertThrows<Exception> { rulesService.getRules(userId, ConfigType.FORMATTING) }
     }
 
     @Test
-    fun `should create new formatting rules if not present`() {
-        // Arrange
-        val userRules = UserRules(userId, language, "", formattingConfig)
-        `when`(bucketClient.get()).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.uri(anyString(), any(), any())).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec)
-        `when`(userRulesFactory.buildUserRules(userId, "", formattingConfig, language)).thenReturn(userRules)
-        `when`(bucketClient.put()).thenReturn(requestBodyUriSpec)
-        `when`(requestBodyUriSpec.uri(anyString(), any(), any())).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.body(userRules)).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(UserRules::class.java)).thenReturn(userRules)
+    fun `test createRules creates and saves formatting and linting rules`() {
+        val userId = 1L
+        val language = "java"
+        val formattingRules =
+            listOf(
+                Rule(0L, "spaceBeforeColon", false, null, ConfigType.FORMATTING),
+                Rule(0L, "spaceAfterColon", false, null, ConfigType.FORMATTING),
+                Rule(0L, "spaceAroundEquals", false, null, ConfigType.FORMATTING),
+                Rule(0L, "newlineBeforePrintln", false, "0", ConfigType.FORMATTING),
+            )
+        val lintingRules =
+            listOf(
+                Rule(0L, "identifier_format", false, "camel case", ConfigType.LINTING),
+                Rule(0L, "mandatory-variable-or-literal-in-println", false, null, ConfigType.LINTING),
+                Rule(0L, "mandatory-variable-or-literal-in-readInput", false, null, ConfigType.LINTING),
+            )
+        val userRules = UserRules(0L, userId, language, listOf(1L, 2L, 3L, 4L))
 
-        // Act
-        rulesService.updateFormattingRules(userId, formattingConfig, language)
+        `when`(rulesRepository.saveAll(anyList())).thenReturn(formattingRules + lintingRules)
+        `when`(userRulesFactory.buildUserRules(anyString(), anyLong(), anyList())).thenReturn(userRules)
 
-        // Assert
-        verify(bucketClient, times(1)).put()
-        verify(requestBodyUriSpec, times(1)).uri(anyString(), any(), any())
-        verify(requestBodySpec, times(1)).body(userRules)
-        verify(requestBodySpec, times(1)).retrieve()
+        rulesService.createRules(userId, language)
+
+        verify(userRulesRepository).save(userRules)
     }
 
     @Test
-    fun `should update existing formatting rules`() {
-        // Arrange
-        val userRules = UserRules(userId, language, "", "")
-        `when`(bucketClient.get()).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.uri(anyString(), any(), any())).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(UserRules::class.java)).thenReturn(userRules)
-        `when`(bucketClient.put()).thenReturn(requestBodyUriSpec)
-        `when`(requestBodyUriSpec.uri(anyString(), any(), any())).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.body(userRules)).thenReturn(requestBodySpec)
-        `when`(requestBodySpec.retrieve()).thenReturn(responseSpec)
-        `when`(responseSpec.body(UserRules::class.java)).thenReturn(userRules)
+    fun `test updateRules updates rules and returns JSON for formatting config type`() {
+        val userId = 1L
+        val language = "java"
+        val configType = ConfigType.FORMATTING
+        val rule1 = Rule(1L, "spaceBeforeColon", false, null, configType)
+        val userRules = UserRules(0L, userId, language, mutableListOf(1L))
 
-        // Act
-        rulesService.updateFormattingRules(userId, formattingConfig, language)
+        `when`(userRulesRepository.findByUserId(userId)).thenReturn(userRules)
+        `when`(rulesRepository.saveAll(anyList())).thenReturn(listOf(rule1))
+        `when`(rulesRepository.findAllById(userRules.allRules)).thenReturn(listOf(rule1))
 
-        // Assert
-        verify(bucketClient, times(1)).put()
-        verify(requestBodyUriSpec, times(1)).uri(anyString(), any(), any())
-        verify(requestBodySpec, times(1)).body(userRules)
-        verify(requestBodySpec, times(1)).retrieve()
+        val result = rulesService.updateRules(userId, language, configType, listOf(rule1))
+        assert(result.contains("spaceBeforeColon"))
+    }
+
+    @Test
+    fun `test getFormatJson returns formatted JSON string for formatting rules`() {
+        val userId = 1L
+        val userRules = UserRules(0L, userId, "java", listOf(1L, 2L))
+        val rule1 = Rule(1L, "spaceBeforeColon", false, null, ConfigType.FORMATTING)
+        val rule2 = Rule(2L, "spaceAfterColon", false, null, ConfigType.FORMATTING)
+
+        `when`(userRulesRepository.findByUserId(userId)).thenReturn(userRules)
+        `when`(rulesRepository.findAllById(userRules.allRules)).thenReturn(listOf(rule1, rule2))
+
+        val result = rulesService.getFormatJson(userId)
+        assert(result.contains("spaceBeforeColon") && result.contains("spaceAfterColon"))
     }
 }

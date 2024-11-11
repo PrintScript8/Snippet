@@ -6,16 +6,15 @@ import org.springframework.stereotype.Component
 @Component
 class UserRulesFactory {
     fun buildUserRules(
-        userId: Long,
         language: String,
-        lintingConfig: String,
-        formattingConfig: String,
+        userId: Long,
+        allRules: List<Long>,
     ): UserRules {
         return UserRules(
-            userId = userId,
-            language = language,
-            lintingConfig = lintingConfig,
-            formattingConfig = formattingConfig,
+            0L,
+            userId,
+            language,
+            allRules,
         )
     }
 }
