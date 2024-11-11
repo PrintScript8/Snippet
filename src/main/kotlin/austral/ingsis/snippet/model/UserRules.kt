@@ -13,7 +13,7 @@ data class UserRules(
     val userId: Long,
     val language: String,
     @ElementCollection
-    var allRules: List<Long>
+    var allRules: List<Long>,
 ) {
     constructor() : this(0L, 0L, "", emptyList())
 }
