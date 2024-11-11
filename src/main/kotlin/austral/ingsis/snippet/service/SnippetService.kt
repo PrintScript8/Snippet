@@ -51,8 +51,9 @@ class SnippetService(
         name: String,
         code: String,
         language: String,
-        ownerId: Long,
+        ownerId: String,
         extension: String,
+        token: String,
     ): Long {
         val snippet: Snippet =
             snippetRepository.save(
@@ -62,6 +63,7 @@ class SnippetService(
             parserClient.put()
                 .uri("/parser/validate")
                 .body(ExecuteSnippet(code, language))
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toBodilessEntity()
         logger.info("Snippet has status code ${result.statusCode}")
@@ -84,6 +86,7 @@ class SnippetService(
         id: Long,
         code: String,
         language: String,
+        token: String,
     ) {
         val snippet: Snippet = snippetRepository.getReferenceById(id)
         snippet.status = ComplianceEnum.PENDING
@@ -92,6 +95,7 @@ class SnippetService(
             parserClient.put()
                 .uri("/parser/validate")
                 .body(ExecuteSnippet(code, language))
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toBodilessEntity()
         logger.info("Snippet with id $id has status code ${result.statusCode}")

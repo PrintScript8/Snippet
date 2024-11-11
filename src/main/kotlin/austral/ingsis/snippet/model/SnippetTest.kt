@@ -11,12 +11,12 @@ data class SnippetTest(
     @GeneratedValue
     val testId: Long = 0,
     val snippetId: Long = 0,
-    val ownerId: Long = 0,
+    val ownerId: String = "",
     val name: String,
     @ElementCollection
     val input: List<String>,
     @ElementCollection
     val output: List<String>,
 ) {
-    constructor() : this(0L, 0L, 0L, "", emptyList(), emptyList())
+    constructor() : this(0L, 0L, "", "", emptyList(), emptyList())
 }

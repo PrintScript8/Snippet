@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 class UserRulesFactory {
     fun buildUserRules(
         language: String,
-        userId: Long,
+        userId: String,
         allRules: List<Long>,
     ): UserRules {
         return UserRules(

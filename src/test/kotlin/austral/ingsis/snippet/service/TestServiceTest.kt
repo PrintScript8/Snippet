@@ -39,8 +39,8 @@ class TestServiceTest {
 
     @Test
     fun `executeTest should return true when response matches output`() {
-        val snippetTest = SnippetTest(1L, 1L, 1L, "Test", listOf("input"), listOf("output"))
-        val snippet = Snippet(1L, "Test Snippet", "Kotlin", 1L, "kt", ComplianceEnum.PENDING)
+        val snippetTest = SnippetTest(1L, 1L, "1L", "Test", listOf("input"), listOf("output"))
+        val snippet = Snippet(1L, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING)
 
         `when`(snippetTestRepository.findById(1L)).thenReturn(Optional.of(snippetTest))
         `when`(snippetRepository.getReferenceById(1L)).thenReturn(snippet)
@@ -51,7 +51,7 @@ class TestServiceTest {
         server.expect(requestTo("http://parser-service:8080/parser/test/execute"))
             .andRespond(withSuccess("[\"output\"]", MediaType.APPLICATION_JSON))
 
-        val result = testService.executeTest(1L, "Test", listOf("input"), listOf("output"))
+        val result = testService.executeTest(1L, "Test", listOf("input"), listOf("output"), "test")
 
         assertTrue(result)
         assertEquals(ComplianceEnum.COMPLIANT, snippet.status)
@@ -59,8 +59,8 @@ class TestServiceTest {
 
     @Test
     fun `executeTest should return false when response does not match output`() {
-        val snippetTest = SnippetTest(1L, 1L, 1L, "Test", listOf("input"), listOf("output"))
-        val snippet = Snippet(1L, "Test Snippet", "Kotlin", 1L, "kt", ComplianceEnum.PENDING)
+        val snippetTest = SnippetTest(1L, 1L, "1L", "Test", listOf("input"), listOf("output"))
+        val snippet = Snippet(1L, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING)
 
         `when`(snippetTestRepository.findById(1L)).thenReturn(Optional.of(snippetTest))
         `when`(snippetRepository.getReferenceById(1L)).thenReturn(snippet)
@@ -71,7 +71,7 @@ class TestServiceTest {
         server.expect(requestTo("http://parser-service:8080/parser/test/execute"))
             .andRespond(withSuccess("[\"wrong output\"]", MediaType.APPLICATION_JSON))
 
-        val result = testService.executeTest(1L, "Test", listOf("input"), listOf("output"))
+        val result = testService.executeTest(1L, "Test", listOf("input"), listOf("output"), "test")
 
         assertFalse(result)
         assertEquals(ComplianceEnum.FAILED, snippet.status)
@@ -79,17 +79,17 @@ class TestServiceTest {
 
     @Test
     fun `createTest should return the created test ID`() {
-        val snippetTest = SnippetTest(0L, 1L, 1L, "Test", listOf("input"), listOf("output"))
+        val snippetTest = SnippetTest(0L, 1L, "1L", "Test", listOf("input"), listOf("output"))
         `when`(snippetTestRepository.save(any(SnippetTest::class.java))).thenReturn(snippetTest.copy(testId = 1L))
 
-        val result = testService.createTest(1L, 1L, "Test", listOf("input"), listOf("output"))
+        val result = testService.createTest(1L, "1L", "Test", listOf("input"), listOf("output"))
 
         assertEquals(1L, result)
     }
 
     @Test
     fun `editTest should update the test`() {
-        val snippetTest = SnippetTest(1L, 1L, 1L, "Test", listOf("input"), listOf("output"))
+        val snippetTest = SnippetTest(1L, 1L, "1L", "Test", listOf("input"), listOf("output"))
         testService.editTest(snippetTest)
         verify(snippetTestRepository).save(snippetTest)
     }
@@ -102,7 +102,7 @@ class TestServiceTest {
 
     @Test
     fun `getAllTests should return all tests for a snippet`() {
-        val snippetTests = listOf(SnippetTest(1L, 1L, 1L, "Test", listOf("input"), listOf("output")))
+        val snippetTests = listOf(SnippetTest(1L, 1L, "1L", "Test", listOf("input"), listOf("output")))
         `when`(snippetTestRepository.findAllBySnippetId(1L)).thenReturn(snippetTests)
 
         val result = testService.getAllTests(1L)
@@ -112,7 +112,7 @@ class TestServiceTest {
 
     @Test
     fun `getTestById should return the test`() {
-        val snippetTest = SnippetTest(1L, 1L, 1L, "Test", listOf("input"), listOf("output"))
+        val snippetTest = SnippetTest(1L, 1L, "1L", "Test", listOf("input"), listOf("output"))
         `when`(snippetTestRepository.findById(1L)).thenReturn(Optional.of(snippetTest))
 
         val result = testService.getTestById(1L)
@@ -122,10 +122,10 @@ class TestServiceTest {
 
     @Test
     fun `getUserTest should return all tests for a user`() {
-        val snippetTests = listOf(SnippetTest(1L, 1L, 1L, "Test", listOf("input"), listOf("output")))
-        `when`(snippetTestRepository.findAllByOwnerId(1L)).thenReturn(snippetTests)
+        val snippetTests = listOf(SnippetTest(1L, 1L, "1L", "Test", listOf("input"), listOf("output")))
+        `when`(snippetTestRepository.findAllByOwnerId("1L")).thenReturn(snippetTests)
 
-        val result = testService.getUserTest(1L)
+        val result = testService.getUserTest("1L")
 
         assertEquals(snippetTests, result)
     }
@@ -133,6 +133,6 @@ class TestServiceTest {
     @Test
     fun `deleteAllTests should remove all tests for a user`() {
         testService.deleteAllTests(1L)
-        verify(snippetTestRepository).deleteAllByOwnerId(1L)
+        verify(snippetTestRepository).deleteAllBySnippetId(1L)
     }
 }

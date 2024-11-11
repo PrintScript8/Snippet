@@ -20,7 +20,7 @@ class RulesService(
     private val logger = LogManager.getLogger(RulesService::class.java)
 
     fun getRules(
-        userId: Long,
+        userId: String,
         configType: ConfigType,
     ): List<Rule> {
         val userRules = userRulesRepository.findByUserId(userId) ?: throw NotFoundException()
@@ -30,7 +30,7 @@ class RulesService(
     }
 
     fun createRules(
-        userId: Long,
+        userId: String,
         language: String,
     ) {
         val formattingRules =
@@ -56,7 +56,7 @@ class RulesService(
     }
 
     fun updateRules(
-        userId: Long,
+        userId: String,
         language: String,
         configType: ConfigType,
         rules: List<Rule>,
@@ -70,19 +70,23 @@ class RulesService(
             }
         }
         userRulesRepository.save(userRules)
-        val rules: List<Rule> = rulesRepository.findAllById(userRules.allRules)
-        if (configType == ConfigType.FORMATTING) {
-            val formatRules = rules.filter { it.type == configType }
-            return convertFormatToJson(formatRules)
-        } else if (configType == ConfigType.LINTING) {
-            val lintRules = rules.filter { it.type == configType }
-            return convertLintingToJson(lintRules)
-        } else {
-            error("Invalid config type")
+        val retrievedRules: List<Rule> = rulesRepository.findAllById(userRules.allRules)
+        when (configType) {
+            ConfigType.FORMATTING -> {
+                val formatRules = retrievedRules.filter { it.type == configType }
+                return convertFormatToJson(formatRules)
+            }
+            ConfigType.LINTING -> {
+                val lintRules = retrievedRules.filter { it.type == configType }
+                return convertLintingToJson(lintRules)
+            }
+            else -> {
+                error("Invalid config type")
+            }
         }
     }
 
-    fun getFormatJson(userId: Long): String {
+    fun getFormatJson(userId: String): String {
         val userRules = userRulesRepository.findByUserId(userId) ?: throw NotFoundException()
         val rules: List<Rule> = rulesRepository.findAllById(userRules.allRules)
         val formatRules = rules.filter { it.type == ConfigType.FORMATTING }

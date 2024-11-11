@@ -1,6 +1,7 @@
 package austral.ingsis.snippet.controller
 
 import austral.ingsis.snippet.model.SnippetTest
+import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.TestService
 import austral.ingsis.snippet.service.ValidationService
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -47,50 +48,30 @@ class TestControllerTest {
     @Autowired
     private lateinit var restTemplate: RestTemplate
 
+    @MockBean
+    private lateinit var authService: AuthService
+
     @BeforeEach
     fun setUp() {
         mockServer = MockRestServiceServer.createServer(restTemplate)
     }
 
     @Test
-    fun `test createTest`() {
-        val testCaseRequest = ExecuteTest("1", "Test Name", listOf("input1", "input2"), listOf("output1", "output2"))
-        val request =
-            MockHttpServletRequest().apply {
-                addHeader("id", "123")
-            }
-
-        `when`(testService.createTest(anyLong(), anyLong(), anyString(), anyList(), anyList())).thenReturn(1L)
-
-        mockServer.expect(requestTo("/test"))
-            .andExpect(method(HttpMethod.POST))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(header("id", "123"))
-            .andExpect(jsonPath("$.id").value(testCaseRequest.id))
-            .andRespond(withSuccess("1", MediaType.APPLICATION_JSON))
-
-        val response = testController.createTest(testCaseRequest, request)
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(1L, response.body)
-    }
-
-    @Test
     fun `test editTest`() {
-        val snippetTest = SnippetTest(1L, 1L, 1L, "Test Name", listOf("input1", "input2"), listOf("output1", "output2"))
+        val snippetTest = SnippetTest(1L, 1L, "1L", "Test Name", listOf("input1", "input2"), listOf("output1", "output2"))
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "123")
             }
+
+        `when`(authService.validateToken("123")).thenReturn("1L")
 
         mockServer.expect(requestTo("/test/1"))
             .andExpect(method(HttpMethod.PUT))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(header("id", "123"))
-            .andExpect(jsonPath("$.id").value(snippetTest.testId))
-            .andRespond(withSuccess("Edited", MediaType.TEXT_PLAIN))
+            .andExpect(header("Authorization", "123"))
 
-        val response = testController.editTest("1", snippetTest, request)
+        val response = testController.editTest("1", snippetTest, request.getHeader("Authorization")!!)
 
         assertEquals("Edited", response)
     }
@@ -99,15 +80,17 @@ class TestControllerTest {
     fun `test deleteTest`() {
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "123")
             }
+
+        `when`(authService.validateToken("123")).thenReturn("1L")
 
         mockServer.expect(requestTo("/test/1"))
             .andExpect(method(HttpMethod.DELETE))
-            .andExpect(header("id", "123"))
+            .andExpect(header("Authorization", "123"))
             .andRespond(withSuccess("Deleted", MediaType.TEXT_PLAIN))
 
-        val response = testController.deleteTest(1L, request)
+        val response = testController.deleteTest(1L, request.getHeader("Authorization")!!)
 
         assertEquals("Deleted", response)
     }
@@ -116,22 +99,23 @@ class TestControllerTest {
     fun `test getTestById`() {
         val snippetTests =
             listOf(
-                SnippetTest(1L, 1L, 1L, "Test Name 1", listOf("input1"), listOf("output1")),
-                SnippetTest(2L, 2L, 2L, "Test Name 2", listOf("input2"), listOf("output2")),
+                SnippetTest(1L, 1L, "1L", "Test Name 1", listOf("input1"), listOf("output1")),
+                SnippetTest(2L, 2L, "2L", "Test Name 2", listOf("input2"), listOf("output2")),
             )
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "123")
             }
 
         `when`(testService.getAllTests(1L)).thenReturn(snippetTests)
+        `when`(authService.validateToken("123")).thenReturn("1L")
 
         mockServer.expect(requestTo("/test/1"))
             .andExpect(method(HttpMethod.GET))
-            .andExpect(header("id", "123"))
+            .andExpect(header("Authorization", "123"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(snippetTests), MediaType.APPLICATION_JSON))
 
-        val response = testController.getTestById(1L, request)
+        val response = testController.getTestById(1L, request.getHeader("Authorization")!!)
 
         assertEquals(snippetTests, response)
     }
@@ -140,22 +124,23 @@ class TestControllerTest {
     fun `test getUserTest`() {
         val snippetTests =
             listOf(
-                SnippetTest(1L, 1L, 1L, "Test Name 1", listOf("input1"), listOf("output1")),
-                SnippetTest(2L, 2L, 2L, "Test Name 2", listOf("input2"), listOf("output2")),
+                SnippetTest(1L, 1L, "1L", "Test Name 1", listOf("input1"), listOf("output1")),
+                SnippetTest(2L, 2L, "2L", "Test Name 2", listOf("input2"), listOf("output2")),
             )
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "123")
             }
 
-        `when`(testService.getUserTest(123L)).thenReturn(snippetTests)
+        `when`(authService.validateToken("123")).thenReturn("1L")
+        `when`(testService.getUserTest("1L")).thenReturn(snippetTests)
 
         mockServer.expect(requestTo("/test"))
             .andExpect(method(HttpMethod.GET))
-            .andExpect(header("id", "123"))
+            .andExpect(header("Authorization", "123"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(snippetTests), MediaType.APPLICATION_JSON))
 
-        val response = testController.getUserTest(request)
+        val response = testController.getUserTest(request.getHeader("Authorization")!!)
 
         assertEquals(snippetTests, response)
     }
@@ -165,20 +150,19 @@ class TestControllerTest {
         val testCaseRequest = ExecuteTest("1", "Test Name", listOf("input1", "input2"), listOf("output1", "output2"))
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "123")
             }
 
-        `when`(validationService.canModify(anyLong(), anyLong())).thenReturn(true)
-        `when`(testService.executeTest(anyLong(), anyString(), anyList(), anyList())).thenReturn(true)
+        `when`(authService.validateToken("123")).thenReturn("1L")
+        `when`(validationService.canModify(anyLong(), anyString())).thenReturn(true)
+        `when`(testService.executeTest(anyLong(), anyString(), anyList(), anyList(), anyString())).thenReturn(true)
 
         mockServer.expect(requestTo("/test/execute"))
             .andExpect(method(HttpMethod.PUT))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(header("id", "123"))
-            .andExpect(jsonPath("$.id").value(testCaseRequest.id))
-            .andRespond(withSuccess("success", MediaType.TEXT_PLAIN))
+            .andExpect(header("Authorization", "123"))
 
-        val response = testController.executeTest(testCaseRequest, request)
+        val response = testController.executeTest(testCaseRequest, request.getHeader("Authorization")!!)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals("success", response.body)
@@ -188,8 +172,8 @@ class TestControllerTest {
     fun `test getTestById - retrieve`() {
         val snippetTests =
             listOf(
-                SnippetTest(1L, 1L, 1L, "Test Name 1", listOf("input1"), listOf("output1")),
-                SnippetTest(2L, 2L, 2L, "Test Name 2", listOf("input2"), listOf("output2")),
+                SnippetTest(1L, 1L, "1L", "Test Name 1", listOf("input1"), listOf("output1")),
+                SnippetTest(2L, 2L, "2L", "Test Name 2", listOf("input2"), listOf("output2")),
             )
         val simpleTests = snippetTests.map { SimpleTest(it.input, it.output) }
 

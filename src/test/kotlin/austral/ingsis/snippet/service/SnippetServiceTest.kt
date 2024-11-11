@@ -41,7 +41,7 @@ class SnippetServiceTest {
     @Test
     fun `test getSnippetById`() {
         val snippetId = 1L
-        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", 1L, "kt", ComplianceEnum.PENDING)
+        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING)
         `when`(snippetRepository.getReferenceById(snippetId)).thenReturn(snippet)
 
         mockServer.expect(ExpectedCount.once(), requestTo("http://asset-service:8080/v1/asset/snippet/$snippetId"))
@@ -58,7 +58,7 @@ class SnippetServiceTest {
     @Test
     fun `test createSnippet`() {
         val snippetId = 1L
-        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", 1L, "kt", ComplianceEnum.PENDING)
+        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING)
         `when`(snippetRepository.save(any(Snippet::class.java))).thenReturn(snippet)
 
         mockServer.expect(ExpectedCount.once(), requestTo("http://parser-service:8080/parser/validate"))
@@ -69,7 +69,8 @@ class SnippetServiceTest {
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withStatus(HttpStatus.OK))
 
-        val result = snippetService.createSnippet("Test Snippet", "fun main() {}", "Kotlin", 1L, "kt")
+        val result = snippetService.
+        createSnippet("Test Snippet", "fun main() {}", "Kotlin", "1L", "kt", "testToken")
 
         assertEquals(snippetId, result)
     }
@@ -77,7 +78,7 @@ class SnippetServiceTest {
     @Test
     fun `test updateSnippet`() {
         val snippetId = 1L
-        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", 1L, "kt", ComplianceEnum.PENDING)
+        val snippet = Snippet(snippetId, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING)
         `when`(snippetRepository.getReferenceById(snippetId)).thenReturn(snippet)
 
         mockServer.expect(ExpectedCount.once(), requestTo("http://parser-service:8080/parser/validate"))
@@ -88,7 +89,7 @@ class SnippetServiceTest {
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withStatus(HttpStatus.OK))
 
-        snippetService.updateSnippet(snippetId, "fun main() {}", "Kotlin")
+        snippetService.updateSnippet(snippetId, "fun main() {}", "Kotlin", "testToken")
 
         verify(snippetRepository, times(2)).save(snippet)
     }
@@ -113,7 +114,7 @@ class SnippetServiceTest {
     @Test
     fun `test setSnippetStatus to non-compliant`() {
         val snippetId = 2L
-        val snippet = Snippet(snippetId, "Test Snippet 2", "Kotlin", 2L, "kt", ComplianceEnum.PENDING)
+        val snippet = Snippet(snippetId, "Test Snippet 2", "Kotlin", "2L", "kt", ComplianceEnum.PENDING)
         `when`(snippetRepository.getReferenceById(snippetId)).thenReturn(snippet)
 
         snippetService.setSnippetStatus(snippetId, "non-compliant")
@@ -125,7 +126,7 @@ class SnippetServiceTest {
     @Test
     fun `test setSnippetStatus to failed`() {
         val snippetId = 3L
-        val snippet = Snippet(snippetId, "Test Snippet 3", "Kotlin", 3L, "kt", ComplianceEnum.PENDING)
+        val snippet = Snippet(snippetId, "Test Snippet 3", "Kotlin", "3L", "kt", ComplianceEnum.PENDING)
         `when`(snippetRepository.getReferenceById(snippetId)).thenReturn(snippet)
 
         snippetService.setSnippetStatus(snippetId, "failed")
@@ -136,8 +137,8 @@ class SnippetServiceTest {
 
     @Test
     fun `test paginatedSnippets`() {
-        val snippet1 = Snippet(1L, "Snippet 1", "Kotlin", 1L, "kt", ComplianceEnum.COMPLIANT)
-        val snippet2 = Snippet(2L, "Snippet 2", "Kotlin", 1L, "kt", ComplianceEnum.COMPLIANT)
+        val snippet1 = Snippet(1L, "Snippet 1", "Kotlin", "1L", "kt", ComplianceEnum.COMPLIANT)
+        val snippet2 = Snippet(2L, "Snippet 2", "Kotlin", "1L", "kt", ComplianceEnum.COMPLIANT)
         val snippets = listOf(snippet1, snippet2)
         `when`(snippetRepository.findAll()).thenReturn(snippets)
 

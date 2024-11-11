@@ -3,11 +3,13 @@ package austral.ingsis.snippet.controller
 import austral.ingsis.snippet.message.RedisMessageEmitter
 import austral.ingsis.snippet.model.ConfigType
 import austral.ingsis.snippet.model.Rule
+import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.RulesService
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +37,9 @@ class SnippetConfigControllerTest {
     @MockBean
     private lateinit var messageEmitter: RedisMessageEmitter
 
+    @MockBean
+    private lateinit var authService: AuthService
+
     @Autowired
     private lateinit var snippetConfigController: SnippetConfigController
 
@@ -54,17 +59,18 @@ class SnippetConfigControllerTest {
         val rules = listOf(Rule(0L, "rule", false, null, ConfigType.LINTING))
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "Bearer 123")
             }
 
-        `when`(rulesService.getRules(123L, ConfigType.LINTING)).thenReturn(rules)
+        `when`(rulesService.getRules("123L", ConfigType.LINTING)).thenReturn(rules)
+        `when`(authService.validateToken("123")).thenReturn("123L")
 
         mockServer.expect(requestTo("/snippets/config/linting"))
             .andExpect(method(HttpMethod.GET))
-            .andExpect(header("id", "123"))
+            .andExpect(header("Authorization", "Bearer 123"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(rules), MediaType.APPLICATION_JSON))
 
-        val response = snippetConfigController.getLintingConfig(request, "java")
+        val response = snippetConfigController.getLintingConfig(request.getHeader("Authorization")!!.substring(7), "java")
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(rules, response.body)
@@ -75,17 +81,18 @@ class SnippetConfigControllerTest {
         val rules = listOf(Rule(0L, "rule", false, null, ConfigType.FORMATTING))
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "Bearer 123")
             }
 
-        `when`(rulesService.getRules(123L, ConfigType.FORMATTING)).thenReturn(rules)
+        `when`(rulesService.getRules("123L", ConfigType.FORMATTING)).thenReturn(rules)
+        `when`(authService.validateToken("123")).thenReturn("123L")
 
         mockServer.expect(requestTo("/snippets/config/formatting"))
             .andExpect(method(HttpMethod.GET))
-            .andExpect(header("id", "123"))
+            .andExpect(header("Authorization", "Bearer 123"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(rules), MediaType.APPLICATION_JSON))
 
-        val response = snippetConfigController.getFormattingConfig(request, "java")
+        val response = snippetConfigController.getFormattingConfig(request.getHeader("Authorization")!!.substring(7), "java")
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(rules, response.body)
@@ -96,14 +103,16 @@ class SnippetConfigControllerTest {
         val rules = listOf(Rule(0L, "rule", false, null, ConfigType.FORMATTING))
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "Bearer 123")
             }
 
-        `when`(rulesService.updateRules(123L, "java", ConfigType.FORMATTING, rules)).thenReturn("updatedRulesJson")
+        `when`(authService.validateToken("Bearer 123")).thenReturn(null)
 
-        snippetConfigController.updateFormattingRules(request, rules, "java")
+        val exception = assertThrows<java.nio.file.AccessDeniedException> {
+            snippetConfigController.updateFormattingRules(request.getHeader("Authorization")!!.substring(7), rules, "java")
+        }
 
-        verify(messageEmitter).publishEvent(123L, "java", "updatedRulesJson", "format")
+        assertEquals("Could not validate user by it's token", exception.message)
     }
 
     @Test
@@ -111,19 +120,20 @@ class SnippetConfigControllerTest {
         val rules = listOf(Rule(0L, "rule", false, null, ConfigType.LINTING))
         val request =
             MockHttpServletRequest().apply {
-                addHeader("id", "123")
+                addHeader("Authorization", "Bearer 123")
             }
 
-        `when`(rulesService.updateRules(123L, "java", ConfigType.LINTING, rules)).thenReturn("updatedRulesJson")
+        `when`(authService.validateToken("123")).thenReturn("123L")
+        `when`(rulesService.updateRules("123L", "java", ConfigType.LINTING, rules)).thenReturn("updatedRulesJson")
 
-        snippetConfigController.updateLintingRules(request, rules, "java")
+        snippetConfigController.updateLintingRules(request.getHeader("Authorization")!!.substring(7), rules, "java")
 
-        verify(messageEmitter).publishEvent(123L, "java", "updatedRulesJson", "lint")
+        verify(messageEmitter).publishEvent("123", "java", "updatedRulesJson", "lint")
     }
 
     @Test
     fun `test initializeRules`() {
-        val userId = 123L
+        val userId = "123L"
         snippetConfigController.initializeRules(userId, "java")
 
         verify(rulesService).createRules(userId, "java")

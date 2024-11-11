@@ -8,7 +8,7 @@ class UserRulesFactoryTest {
     fun `test buildUserRules`() {
         val factory = UserRulesFactory()
         val language = "en"
-        val userId = 123L
+        val userId = "123L"
         val allRules = listOf(1L, 2L, 3L)
 
         val userRules = factory.buildUserRules(language, userId, allRules)

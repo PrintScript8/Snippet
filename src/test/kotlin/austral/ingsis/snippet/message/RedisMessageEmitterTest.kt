@@ -17,7 +17,7 @@ class RedisMessageEmitterTest {
 
     @Test
     fun `test publishEvent`() {
-        val ownerId = 1L
+        val ownerId = "1L"
         val language = "Kotlin"
         val rules = "rules"
         val action = "create"

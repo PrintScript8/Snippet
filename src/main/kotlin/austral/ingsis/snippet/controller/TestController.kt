@@ -1,6 +1,7 @@
 package austral.ingsis.snippet.controller
 
 import austral.ingsis.snippet.model.SnippetTest
+import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.TestService
 import austral.ingsis.snippet.service.ValidationService
 import jakarta.servlet.http.HttpServletRequest
@@ -13,24 +14,37 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.nio.file.AccessDeniedException
 
 @RestController
 @RequestMapping("/test")
 class TestController(
     @Autowired private val testService: TestService,
     @Autowired private val validationService: ValidationService,
+    @Autowired private val authService: AuthService,
 ) {
+
+    private fun getIdByToken(token: String): String {
+        val id: String? = authService.validateToken(token)
+        if (id != null) {
+            return id
+        }
+        // error, not authenticated
+        throw AccessDeniedException("Could not validate user by it's token")
+    }
+
     @PostMapping
     fun createTest(
         @RequestBody testCaseRequest: ExecuteTest,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): ResponseEntity<Long> {
-        val ownerId = request.getHeader("id").toLong()
-//        if (!validationService.canModify(ownerId, testCaseRequest.snippetId.toLong())) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-//        }
+        val ownerId = getIdByToken(token)
+        if (!validationService.canModify(testCaseRequest.id.toLong(), token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
         val testId: Long =
             testService.createTest(
                 testCaseRequest.id.toLong(),
@@ -46,9 +60,9 @@ class TestController(
     fun editTest(
         @PathVariable id: String,
         @RequestBody test: SnippetTest,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): String {
-        val ownerId = request.getHeader("id").toLong()
+        val ownerId = getIdByToken(token)
         println(id)
         testService.editTest(test)
         return "Edited"
@@ -57,9 +71,9 @@ class TestController(
     @DeleteMapping("/{id}")
     fun deleteTest(
         @PathVariable id: Long,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): String {
-        val ownerId = request.getHeader("id").toLong()
+        val ownerId = getIdByToken(token)
         testService.deleteTest(id)
         return "Deleted"
     }
@@ -67,25 +81,27 @@ class TestController(
     @GetMapping("/{id}")
     fun getTestById(
         @PathVariable id: Long,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): List<SnippetTest> {
-        val ownerId = request.getHeader("id").toLong()
+        val ownerId = getIdByToken(token)
         return testService.getAllTests(id)
     }
 
     @GetMapping
-    fun getUserTest(request: HttpServletRequest): List<SnippetTest> {
-        val userId = request.getHeader("id").toLong()
+    fun getUserTest(
+        @RequestHeader("Authorization") token: String,
+    ): List<SnippetTest> {
+        val userId = getIdByToken(token)
         return testService.getUserTest(userId)
     }
 
     @PutMapping("/execute")
     fun executeTest(
         @RequestBody testCaseRequest: ExecuteTest,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): ResponseEntity<String> {
-        val ownerId = request.getHeader("id").toLong()
-        if (!validationService.canModify(ownerId, testCaseRequest.id.toLong())) {
+        val ownerId = getIdByToken(token)
+        if (!validationService.canModify(testCaseRequest.id.toLong(), ownerId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
         val testResult: Boolean =
@@ -94,6 +110,7 @@ class TestController(
                 testCaseRequest.name,
                 testCaseRequest.input,
                 testCaseRequest.output,
+                token,
             )
         val enum = if (testResult) "success" else "fail"
         return ResponseEntity.ok(enum)
@@ -101,7 +118,7 @@ class TestController(
 
     @GetMapping("/retrieve/{id}")
     fun getTestById(
-        @PathVariable id: Long,
+        @PathVariable id: Long
     ): List<SimpleTest> {
         val tests: List<SnippetTest> = testService.getAllTests(id)
         val simpleTest: List<SimpleTest> =

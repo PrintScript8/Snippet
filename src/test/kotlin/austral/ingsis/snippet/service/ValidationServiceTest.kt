@@ -26,7 +26,7 @@ class ValidationServiceTest {
     private lateinit var objectMapper: ObjectMapper
 
     private val baseUrl = "http://permission-service:8080"
-    private val userId = 1L
+    private val userId = "1L"
     private val snippetId = 2L
 
     @BeforeEach
@@ -36,7 +36,7 @@ class ValidationServiceTest {
 
     @Test
     fun `exists should return true when user exists`() {
-        mockServer.expect(requestTo("$baseUrl/validate/create/$userId"))
+        mockServer.expect(requestTo("$baseUrl/validate/create"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(true), MediaType.APPLICATION_JSON))
 
@@ -47,7 +47,7 @@ class ValidationServiceTest {
 
     @Test
     fun `exists should return false when user does not exist`() {
-        mockServer.expect(requestTo("$baseUrl/validate/create/$userId"))
+        mockServer.expect(requestTo("$baseUrl/validate/create"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(false), MediaType.APPLICATION_JSON))
 
@@ -59,16 +59,16 @@ class ValidationServiceTest {
     @Test
     fun `canModify should return true when user has permission`() {
         // Mock exists check
-        mockServer.expect(requestTo("$baseUrl/validate/create/$userId"))
+        mockServer.expect(requestTo("$baseUrl/validate/create"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(true), MediaType.APPLICATION_JSON))
 
         // Mock modify permission check
-        mockServer.expect(requestTo("$baseUrl/validate/edit/$userId/$snippetId"))
+        mockServer.expect(requestTo("$baseUrl/validate/edit/$snippetId"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(true), MediaType.APPLICATION_JSON))
 
-        val result = validationService.canModify(userId, snippetId)
+        val result = validationService.canModify(snippetId, userId)
         assertTrue(result)
         mockServer.verify()
     }
@@ -76,16 +76,16 @@ class ValidationServiceTest {
     @Test
     fun `canRead should return true when user has permission`() {
         // Mock exists check
-        mockServer.expect(requestTo("$baseUrl/validate/create/$userId"))
+        mockServer.expect(requestTo("$baseUrl/validate/create"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(true), MediaType.APPLICATION_JSON))
 
         // Mock read permission check
-        mockServer.expect(requestTo("$baseUrl/validate/read/$userId/$snippetId"))
+        mockServer.expect(requestTo("$baseUrl/validate/read/$snippetId"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(true), MediaType.APPLICATION_JSON))
 
-        val result = validationService.canRead(userId, snippetId)
+        val result = validationService.canRead(snippetId, userId)
         assertTrue(result)
         mockServer.verify()
     }
@@ -93,41 +93,41 @@ class ValidationServiceTest {
     @Test
     fun `canDelete should return true when user has permission`() {
         // Mock exists check
-        mockServer.expect(requestTo("$baseUrl/validate/create/$userId"))
+        mockServer.expect(requestTo("$baseUrl/validate/create"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(true), MediaType.APPLICATION_JSON))
 
         // Mock delete permission check
-        mockServer.expect(requestTo("$baseUrl/validate/delete/$userId/$snippetId"))
+        mockServer.expect(requestTo("$baseUrl/validate/delete/$snippetId"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(true), MediaType.APPLICATION_JSON))
 
-        val result = validationService.canDelete(userId, snippetId)
+        val result = validationService.canDelete(snippetId, userId)
         assertTrue(result)
         mockServer.verify()
     }
 
     @Test
     fun `all permission checks should return false when user does not exist`() {
-        mockServer.expect(requestTo("$baseUrl/validate/create/$userId"))
+        mockServer.expect(requestTo("$baseUrl/validate/create"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(false), MediaType.APPLICATION_JSON))
 
-        assertFalse(validationService.canModify(userId, snippetId))
+        assertFalse(validationService.canModify(snippetId, userId))
 
         mockServer.reset()
-        mockServer.expect(requestTo("$baseUrl/validate/create/$userId"))
+        mockServer.expect(requestTo("$baseUrl/validate/create"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(false), MediaType.APPLICATION_JSON))
 
-        assertFalse(validationService.canRead(userId, snippetId))
+        assertFalse(validationService.canRead(snippetId, userId))
 
         mockServer.reset()
-        mockServer.expect(requestTo("$baseUrl/validate/create/$userId"))
+        mockServer.expect(requestTo("$baseUrl/validate/create"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withSuccess(objectMapper.writeValueAsString(false), MediaType.APPLICATION_JSON))
 
-        assertFalse(validationService.canDelete(userId, snippetId))
+        assertFalse(validationService.canDelete(snippetId, userId))
 
         mockServer.verify()
     }

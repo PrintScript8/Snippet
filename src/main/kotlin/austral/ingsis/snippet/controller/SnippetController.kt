@@ -3,6 +3,7 @@ package austral.ingsis.snippet.controller
 import austral.ingsis.snippet.exception.InvalidSnippetException
 import austral.ingsis.snippet.message.RedisMessageEmitter
 import austral.ingsis.snippet.model.CommunicationSnippet
+import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.SnippetService
 import austral.ingsis.snippet.service.ValidationService
 import jakarta.servlet.http.HttpServletRequest
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestClient
+import java.nio.file.AccessDeniedException
 
 @RestController
 @RequestMapping("/snippets")
@@ -28,17 +31,26 @@ class SnippetController(
     @Autowired private val clientBuilder: RestClient.Builder,
     @Autowired private val validationService: ValidationService,
     @Autowired private val messageEmitter: RedisMessageEmitter,
+    @Autowired private val authService: AuthService,
 ) {
     private final var permissionClient: RestClient = clientBuilder.baseUrl("http://permission-service:8080").build()
     private val logger = LogManager.getLogger(SnippetController::class.java)
 
+    private fun getIdByToken(token: String): String {
+        val id: String? = authService.validateToken(token)
+        if (id != null) {
+            return id
+        }
+        // error, not authenticated
+        throw AccessDeniedException("Could not validate user by it's token")
+    }
+
     @GetMapping("/{id}")
     fun getSnippetById(
         @PathVariable id: Long,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): ResponseEntity<CommunicationSnippet?> {
-        val userId = request.getHeader("id").toLong()
-        if (!validationService.canRead(userId, id)) {
+        if (!validationService.canRead(id, token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null)
         }
         val snippet: CommunicationSnippet? = snippetService.getSnippetById(id)
@@ -53,10 +65,10 @@ class SnippetController(
     @PostMapping
     fun createSnippet(
         @RequestBody snippet: MessageSnippet,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): ResponseEntity<Long> {
-        val userId = request.getHeader("id").toLong()
-        if (!validationService.exists(userId)) {
+        val userId = getIdByToken(token)
+        if (!validationService.exists(token)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
         }
         try {
@@ -67,11 +79,12 @@ class SnippetController(
                     snippet.language,
                     userId,
                     snippet.extension,
+                    token,
                 )
             permissionClient
                 .put()
                 .uri("/users/snippets/{snippetId}", id)
-                .headers { httpHeaders -> httpHeaders.set("id", userId.toString()) }
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toBodilessEntity()
             return ResponseEntity.status(HttpStatus.CREATED).body(id)
@@ -87,10 +100,9 @@ class SnippetController(
         @PathVariable id: Long,
         @RequestBody content: Content,
         @RequestParam language: String,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): ResponseEntity<Void> {
-        val userId = request.getHeader("id").toLong()
-        if (!validationService.canModify(userId, id)) {
+        if (!validationService.canModify(id, token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
         try {
@@ -99,8 +111,9 @@ class SnippetController(
                 id,
                 content.content,
                 language,
+                token,
             )
-            messageEmitter.publishEvent(userId, language, "", "execute", id)
+            messageEmitter.publishEvent(token, language, "", "execute", id)
             return ResponseEntity.status(HttpStatus.OK).build()
         } catch (e: InvalidSnippetException) {
             logger.error("Error fetching snippet by id: $id", e)
@@ -111,17 +124,19 @@ class SnippetController(
     @DeleteMapping("/{id}")
     fun deleteSnippet(
         @PathVariable id: Long,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): ResponseEntity<String> {
-        val userId = request.getHeader("id").toLong()
-        if (!validationService.canDelete(userId, id)) {
+        if (!validationService.canDelete(id, token)) {
             return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body("User with id $userId cannot delete snippet with id $id")
+                .body("User with token $token cannot delete snippet with id $id")
         }
         val snippet: CommunicationSnippet? = snippetService.getSnippetById(id)
         if (snippet != null) {
-            permissionClient.delete().uri("/users/snippets/$snippet.ownerId/$id").retrieve()
+            permissionClient.delete()
+                .uri("/users/snippets/$id")
+                .headers { headers -> headers.set("Authorization", token) }
+                .retrieve()
         }
         snippetService.deleteSnippet(id)
         return ResponseEntity.status(HttpStatus.OK).body("Snippet with id $id has been deleted")
@@ -132,10 +147,10 @@ class SnippetController(
         page: Int,
         pageSize: Int,
         snippetName: String?,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): ResponseEntity<PaginationSnippet> {
-        val userId = request.getHeader("id").toLong()
-        if (!validationService.exists(userId)) {
+
+        if (!validationService.exists(token)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
         }
         val snippets: List<CommunicationSnippet> =
@@ -145,7 +160,7 @@ class SnippetController(
                 page,
                 pageSize,
                 snippets.size,
-                snippets.filter { validationService.canRead(userId, it.id!!) },
+                snippets.filter { validationService.canRead(it.id!!, token) },
             )
         logger.info("Returning paginated snippets: $paginatedSnippets")
         return ResponseEntity.status(HttpStatus.OK).body(paginatedSnippets)
@@ -154,10 +169,9 @@ class SnippetController(
     @PutMapping("/status")
     fun setSnippetStatus(
         @RequestBody setStatus: SetStatus,
-        request: HttpServletRequest,
+        @RequestHeader("Authorization") token: String,
     ): ResponseEntity<Void> {
-        val userId = request.getHeader("id").toLong()
-        if (!validationService.canModify(userId, setStatus.id)) {
+        if (!validationService.canModify(setStatus.id, token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
         snippetService.setSnippetStatus(setStatus.id, setStatus.status)

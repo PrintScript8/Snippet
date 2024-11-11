@@ -36,7 +36,7 @@ class RulesServiceTest {
 
     @Test
     fun `test getRules returns correct rules based on config type`() {
-        val userId = 1L
+        val userId = "1L"
         val configType = ConfigType.FORMATTING
         val userRules = UserRules(0L, userId, "java", listOf(1L, 2L))
         val rule1 = Rule(1L, "spaceBeforeColon", false, null, ConfigType.FORMATTING)
@@ -51,7 +51,7 @@ class RulesServiceTest {
 
     @Test
     fun `test getRules throws exception if user not found`() {
-        val userId = 1L
+        val userId = "1L"
         `when`(userRulesRepository.findByUserId(userId)).thenReturn(null)
 
         assertThrows<Exception> { rulesService.getRules(userId, ConfigType.FORMATTING) }
@@ -59,7 +59,7 @@ class RulesServiceTest {
 
     @Test
     fun `test createRules creates and saves formatting and linting rules`() {
-        val userId = 1L
+        val userId = "1L"
         val language = "java"
         val formattingRules =
             listOf(
@@ -77,7 +77,7 @@ class RulesServiceTest {
         val userRules = UserRules(0L, userId, language, listOf(1L, 2L, 3L, 4L))
 
         `when`(rulesRepository.saveAll(anyList())).thenReturn(formattingRules + lintingRules)
-        `when`(userRulesFactory.buildUserRules(anyString(), anyLong(), anyList())).thenReturn(userRules)
+        `when`(userRulesFactory.buildUserRules(anyString(), anyString(), anyList())).thenReturn(userRules)
 
         rulesService.createRules(userId, language)
 
@@ -86,7 +86,7 @@ class RulesServiceTest {
 
     @Test
     fun `test updateRules updates rules and returns JSON for formatting config type`() {
-        val userId = 1L
+        val userId = "1L"
         val language = "java"
         val configType = ConfigType.FORMATTING
         val rule1 = Rule(1L, "spaceBeforeColon", false, null, configType)
@@ -102,7 +102,7 @@ class RulesServiceTest {
 
     @Test
     fun `test getFormatJson returns formatted JSON string for formatting rules`() {
-        val userId = 1L
+        val userId = "1L"
         val userRules = UserRules(0L, userId, "java", listOf(1L, 2L))
         val rule1 = Rule(1L, "spaceBeforeColon", false, null, ConfigType.FORMATTING)
         val rule2 = Rule(2L, "spaceAfterColon", false, null, ConfigType.FORMATTING)

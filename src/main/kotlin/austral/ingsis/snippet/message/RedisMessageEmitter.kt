@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 
 interface MessageEmitter {
     fun publishEvent(
-        ownerId: Long,
+        token: String,
         language: String,
         rules: String,
         action: String,
@@ -28,14 +28,14 @@ class RedisMessageEmitter
         private val logger = LogManager.getLogger(RedisMessageEmitter::class.java)
 
         override fun publishEvent(
-            ownerId: Long,
+            token: String,
             language: String,
             rules: String,
             action: String,
             snippedId: Long?,
         ) {
             val mapper = ObjectMapper()
-            val publishingMessage = ExecuteRequest(ownerId, language, rules, action, snippedId)
+            val publishingMessage = ExecuteRequest(token, language, rules, action, snippedId)
             val stringPublishingImage = mapper.writeValueAsString(publishingMessage)
             logger.info("Publishing message: $stringPublishingImage")
             emit(stringPublishingImage)
