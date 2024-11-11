@@ -5,7 +5,6 @@ import austral.ingsis.snippet.model.ConfigType
 import austral.ingsis.snippet.model.Rule
 import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.RulesService
-import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,7 +24,6 @@ class SnippetConfigController(
     @Autowired private val messageEmitter: RedisMessageEmitter,
     @Autowired private val authService: AuthService,
 ) {
-
     private fun getIdByToken(token: String): String {
         val id: String? = authService.validateToken(token)
         if (id != null) {

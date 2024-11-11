@@ -47,6 +47,7 @@ class SnippetService(
         return communicationSnippet
     }
 
+    @Suppress("LongParameterList")
     fun createSnippet(
         name: String,
         code: String,

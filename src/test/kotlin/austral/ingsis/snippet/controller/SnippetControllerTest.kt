@@ -47,13 +47,18 @@ class SnippetControllerTest {
         val snippet = MessageSnippet("Test Snippet", "Kotlin", "fun main() {}", "kt")
         val userId = "1L"
         val snippetId = 0L
-        val request = MockHttpServletRequest().apply {
-            addHeader("Authorization", "123")
-        }
+        val request =
+            MockHttpServletRequest().apply {
+                addHeader("Authorization", "123")
+            }
 
         `when`(authService.validateToken("123")).thenReturn("1L")
         `when`(validationService.exists("123")).thenReturn(true)
-        `when`(snippetService.createSnippet(snippet.name, snippet.content, snippet.language, userId, snippet.extension, userId)).thenReturn(snippetId)
+        `when`(
+            snippetService
+                .createSnippet(snippet.name, snippet.content, snippet.language, userId, snippet.extension, userId),
+        )
+            .thenReturn(snippetId)
 
         mockServer.expect(requestTo("http://permission-service:8080/users/snippets/$snippetId"))
             .andExpect(method(HttpMethod.PUT))
@@ -75,17 +80,18 @@ class SnippetControllerTest {
         `when`(validationService.exists("123")).thenReturn(true)
         `when`(validationService.canRead(1L, "123")).thenReturn(true)
 
-        val snippets = listOf(
-            CommunicationSnippet(
-                1L,
-                "Test Snippet",
-                "Kotlin",
-                userId,
-                "kt",
-                "kt",
-                ComplianceEnum.COMPLIANT,
+        val snippets =
+            listOf(
+                CommunicationSnippet(
+                    1L,
+                    "Test Snippet",
+                    "Kotlin",
+                    userId,
+                    "kt",
+                    "kt",
+                    ComplianceEnum.COMPLIANT,
+                ),
             )
-        )
         `when`(snippetService.paginatedSnippets(page, pageSize, snippetName)).thenReturn(snippets)
 
         val request = MockHttpServletRequest()
@@ -104,10 +110,10 @@ class SnippetControllerTest {
 
         `when`(validationService.canModify(setStatus.id, "123")).thenReturn(true)
 
-        val request = MockHttpServletRequest().apply {
-            addHeader("Authorization", "123")
-        }
-
+        val request =
+            MockHttpServletRequest().apply {
+                addHeader("Authorization", "123")
+            }
 
         val response = snippetController.setSnippetStatus(setStatus, request.getHeader("Authorization")!!)
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -117,22 +123,24 @@ class SnippetControllerTest {
     fun `test getSnippetById`() {
         val userId = "1L"
         val snippetId = 1L
-        val snippet = CommunicationSnippet(
-            snippetId,
-            "Test Snippet",
-            "Kotlin",
-            userId,
-            "kt",
-            "kt",
-            ComplianceEnum.COMPLIANT,
-        )
+        val snippet =
+            CommunicationSnippet(
+                snippetId,
+                "Test Snippet",
+                "Kotlin",
+                userId,
+                "kt",
+                "kt",
+                ComplianceEnum.COMPLIANT,
+            )
 
         `when`(validationService.canRead(snippetId, "123")).thenReturn(true)
         `when`(snippetService.getSnippetById(snippetId)).thenReturn(snippet)
 
-        val request = MockHttpServletRequest().apply {
-            addHeader("Authorization", "123")
-        }
+        val request =
+            MockHttpServletRequest().apply {
+                addHeader("Authorization", "123")
+            }
 
         val response = snippetController.getSnippetById(snippetId, request.getHeader("Authorization")!!)
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -145,13 +153,16 @@ class SnippetControllerTest {
         val snippetId = 1L
         val content = "Updated content"
         val language = "Kotlin"
-        val request = MockHttpServletRequest().apply {
-            addHeader("Authorization", "123")
-        }
+        val request =
+            MockHttpServletRequest().apply {
+                addHeader("Authorization", "123")
+            }
 
         `when`(validationService.canModify(snippetId, "123")).thenReturn(true)
 
-        val response = snippetController.updateSnippet(snippetId, Content(content), language, request.getHeader("Authorization")!!)
+        val response =
+            snippetController
+                .updateSnippet(snippetId, Content(content), language, request.getHeader("Authorization")!!)
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 }

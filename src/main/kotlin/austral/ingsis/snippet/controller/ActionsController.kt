@@ -2,7 +2,6 @@ package austral.ingsis.snippet.controller
 
 import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.RulesService
-import jakarta.servlet.http.HttpServletRequest
 import org.apache.logging.log4j.LogManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

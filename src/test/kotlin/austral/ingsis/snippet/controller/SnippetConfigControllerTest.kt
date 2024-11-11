@@ -70,7 +70,9 @@ class SnippetConfigControllerTest {
             .andExpect(header("Authorization", "Bearer 123"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(rules), MediaType.APPLICATION_JSON))
 
-        val response = snippetConfigController.getLintingConfig(request.getHeader("Authorization")!!.substring(7), "java")
+        val response =
+            snippetConfigController
+                .getLintingConfig(request.getHeader("Authorization")!!.substring(7), "java")
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(rules, response.body)
@@ -92,7 +94,9 @@ class SnippetConfigControllerTest {
             .andExpect(header("Authorization", "Bearer 123"))
             .andRespond(withSuccess(objectMapper.writeValueAsString(rules), MediaType.APPLICATION_JSON))
 
-        val response = snippetConfigController.getFormattingConfig(request.getHeader("Authorization")!!.substring(7), "java")
+        val response =
+            snippetConfigController
+                .getFormattingConfig(request.getHeader("Authorization")!!.substring(7), "java")
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(rules, response.body)
@@ -108,9 +112,14 @@ class SnippetConfigControllerTest {
 
         `when`(authService.validateToken("Bearer 123")).thenReturn(null)
 
-        val exception = assertThrows<java.nio.file.AccessDeniedException> {
-            snippetConfigController.updateFormattingRules(request.getHeader("Authorization")!!.substring(7), rules, "java")
-        }
+        val exception =
+            assertThrows<java.nio.file.AccessDeniedException> {
+                snippetConfigController.updateFormattingRules(
+                    request.getHeader("Authorization")!!.substring(7),
+                    rules,
+                    "java",
+                )
+            }
 
         assertEquals("Could not validate user by it's token", exception.message)
     }

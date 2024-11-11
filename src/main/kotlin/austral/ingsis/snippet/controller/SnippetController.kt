@@ -6,7 +6,6 @@ import austral.ingsis.snippet.model.CommunicationSnippet
 import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.SnippetService
 import austral.ingsis.snippet.service.ValidationService
-import jakarta.servlet.http.HttpServletRequest
 import org.apache.logging.log4j.LogManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -149,7 +148,6 @@ class SnippetController(
         snippetName: String?,
         @RequestHeader("Authorization") token: String,
     ): ResponseEntity<PaginationSnippet> {
-
         if (!validationService.exists(token)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
         }

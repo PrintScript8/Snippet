@@ -22,7 +22,6 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
-import org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
@@ -58,7 +57,15 @@ class TestControllerTest {
 
     @Test
     fun `test editTest`() {
-        val snippetTest = SnippetTest(1L, 1L, "1L", "Test Name", listOf("input1", "input2"), listOf("output1", "output2"))
+        val snippetTest =
+            SnippetTest(
+                1L,
+                1L,
+                "1L",
+                "Test Name",
+                listOf("input1", "input2"),
+                listOf("output1", "output2"),
+            )
         val request =
             MockHttpServletRequest().apply {
                 addHeader("Authorization", "123")

@@ -12,7 +12,7 @@ class ValidationService(
 
     fun canModify(
         snippetId: Long,
-        token: String
+        token: String,
     ): Boolean {
         return exists(token) &&
             validationClient.put()
@@ -24,7 +24,7 @@ class ValidationService(
 
     fun canRead(
         snippetId: Long,
-        token: String
+        token: String,
     ): Boolean {
         return exists(token) &&
             validationClient.put()
@@ -34,9 +34,7 @@ class ValidationService(
                 .toEntity(Boolean::class.java).body == true
     }
 
-    fun exists(
-        token: String
-        ): Boolean {
+    fun exists(token: String): Boolean {
         return validationClient.put()
             .uri("/validate/create")
             .headers { headers -> headers.set("Authorization", token) }
@@ -46,7 +44,7 @@ class ValidationService(
 
     fun canDelete(
         snippetId: Long,
-        token: String
+        token: String,
     ): Boolean {
         return exists(token) &&
             validationClient.put()

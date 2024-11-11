@@ -4,7 +4,6 @@ import austral.ingsis.snippet.model.SnippetTest
 import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.TestService
 import austral.ingsis.snippet.service.ValidationService
-import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -26,7 +25,6 @@ class TestController(
     @Autowired private val validationService: ValidationService,
     @Autowired private val authService: AuthService,
 ) {
-
     private fun getIdByToken(token: String): String {
         val id: String? = authService.validateToken(token)
         if (id != null) {
@@ -118,7 +116,7 @@ class TestController(
 
     @GetMapping("/retrieve/{id}")
     fun getTestById(
-        @PathVariable id: Long
+        @PathVariable id: Long,
     ): List<SimpleTest> {
         val tests: List<SnippetTest> = testService.getAllTests(id)
         val simpleTest: List<SimpleTest> =

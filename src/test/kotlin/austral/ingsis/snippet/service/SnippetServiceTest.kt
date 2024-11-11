@@ -69,8 +69,9 @@ class SnippetServiceTest {
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withStatus(HttpStatus.OK))
 
-        val result = snippetService.
-        createSnippet("Test Snippet", "fun main() {}", "Kotlin", "1L", "kt", "testToken")
+        val result =
+            snippetService
+                .createSnippet("Test Snippet", "fun main() {}", "Kotlin", "1L", "kt", "testToken")
 
         assertEquals(snippetId, result)
     }
