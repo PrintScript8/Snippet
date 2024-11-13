@@ -99,7 +99,7 @@ class TestController(
         @RequestHeader("Authorization") token: String,
     ): ResponseEntity<String> {
         val ownerId = getIdByToken(token)
-        if (!validationService.canModify(testCaseRequest.id.toLong(), ownerId)) {
+        if (!validationService.canModify(testCaseRequest.id.toLong(), token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
         val testResult: Boolean =
