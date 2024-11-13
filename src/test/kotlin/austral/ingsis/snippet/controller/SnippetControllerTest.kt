@@ -90,6 +90,7 @@ class SnippetControllerTest {
                     "kt",
                     "kt",
                     ComplianceEnum.COMPLIANT,
+                    "Test",
                 ),
             )
         `when`(snippetService.paginatedSnippets(page, pageSize, snippetName)).thenReturn(snippets)
@@ -132,6 +133,7 @@ class SnippetControllerTest {
                 "kt",
                 "kt",
                 ComplianceEnum.COMPLIANT,
+                "Test",
             )
 
         `when`(validationService.canRead(snippetId, "123")).thenReturn(true)

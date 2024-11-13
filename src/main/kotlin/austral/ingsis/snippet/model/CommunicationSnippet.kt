@@ -8,4 +8,5 @@ data class CommunicationSnippet(
     val content: String,
     val extension: String,
     val status: ComplianceEnum,
+    val nickName: String,
 )

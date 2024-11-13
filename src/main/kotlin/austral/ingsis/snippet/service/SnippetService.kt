@@ -5,12 +5,14 @@ import austral.ingsis.snippet.model.CommunicationSnippet
 import austral.ingsis.snippet.model.ComplianceEnum
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.repository.SnippetRepository
+import jakarta.transaction.InvalidTransactionException
 import jakarta.transaction.Transactional
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.toEntity
 
 @Service
 class SnippetService(
@@ -20,6 +22,7 @@ class SnippetService(
 ) {
     var bucketClient: RestClient = restClientBuilder.baseUrl("http://asset-service:8080").build()
     var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8080").build()
+    var permissionClient: RestClient = restClientBuilder.baseUrl("http://permission-service:8080").build()
     val logger: Logger = LogManager.getLogger(SnippetService::class.java)
 
     fun getSnippetById(id: Long): CommunicationSnippet? {
@@ -42,6 +45,7 @@ class SnippetService(
                 code,
                 snippet.extension,
                 snippet.status,
+                snippet.nickName,
             )
         logger.info("Snippet with id $id has been retrieved")
         return communicationSnippet
@@ -56,9 +60,18 @@ class SnippetService(
         extension: String,
         token: String,
     ): Long {
+        val user =
+            permissionClient.get()
+                .uri("/users")
+                .headers { headers -> headers.set("Authorization", token) }
+                .retrieve()
+                .toEntity(User::class.java)
+        if (user.body?.name == null) {
+            throw InvalidTransactionException("Invalid user")
+        }
         val snippet: Snippet =
             snippetRepository.save(
-                Snippet(0, name, language, ownerId, extension, ComplianceEnum.PENDING),
+                Snippet(0, name, language, ownerId, extension, ComplianceEnum.PENDING, user.body!!.name),
             )
         val result =
             parserClient.put()
@@ -146,6 +159,7 @@ class SnippetService(
                     code ?: "",
                     snippet.extension,
                     snippet.status,
+                    snippet.nickName,
                 ),
             )
         }
@@ -185,3 +199,5 @@ class SnippetService(
 }
 
 data class ExecuteSnippet(val code: String, val language: String)
+
+data class User(val id: String, val name: String)

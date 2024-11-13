@@ -14,6 +14,7 @@ data class Snippet(
     val ownerId: String,
     val extension: String,
     var status: ComplianceEnum,
+    val nickName: String,
 ) {
-    constructor() : this(0, "", "", "", "", ComplianceEnum.PENDING)
+    constructor() : this(0, "", "", "", "", ComplianceEnum.PENDING, "")
 }

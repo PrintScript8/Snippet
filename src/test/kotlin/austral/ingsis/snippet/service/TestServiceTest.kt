@@ -40,7 +40,7 @@ class TestServiceTest {
     @Test
     fun `executeTest should return true when response matches output`() {
         val snippetTest = SnippetTest(1L, 1L, "1L", "Test", listOf("input"), listOf("output"))
-        val snippet = Snippet(1L, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING)
+        val snippet = Snippet(1L, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING, "Test")
 
         `when`(snippetTestRepository.findById(1L)).thenReturn(Optional.of(snippetTest))
         `when`(snippetRepository.getReferenceById(1L)).thenReturn(snippet)
@@ -60,7 +60,7 @@ class TestServiceTest {
     @Test
     fun `executeTest should return false when response does not match output`() {
         val snippetTest = SnippetTest(1L, 1L, "1L", "Test", listOf("input"), listOf("output"))
-        val snippet = Snippet(1L, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING)
+        val snippet = Snippet(1L, "Test Snippet", "Kotlin", "1L", "kt", ComplianceEnum.PENDING, "Test")
 
         `when`(snippetTestRepository.findById(1L)).thenReturn(Optional.of(snippetTest))
         `when`(snippetRepository.getReferenceById(1L)).thenReturn(snippet)

@@ -16,6 +16,7 @@ class CommunicationSnippetTest {
                 content = "fun main() { println(\"Hello, World!\") }",
                 extension = "kt",
                 status = ComplianceEnum.COMPLIANT,
+                nickName = "Test",
             )
 
         assertNotNull(snippet.id)

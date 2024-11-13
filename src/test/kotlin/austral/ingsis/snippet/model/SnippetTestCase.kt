@@ -15,6 +15,7 @@ class SnippetTestCase {
                 ownerId = "123L",
                 extension = "kt",
                 status = ComplianceEnum.COMPLIANT,
+                nickName = "Test",
             )
 
         assertNotNull(snippet.id)
