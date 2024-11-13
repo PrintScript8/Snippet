@@ -69,10 +69,6 @@ class SnippetService(
         if (user.body?.name == null) {
             throw InvalidTransactionException("Invalid user")
         }
-        val snippet: Snippet =
-            snippetRepository.save(
-                Snippet(0, name, language, ownerId, extension, ComplianceEnum.PENDING, user.body!!.name),
-            )
         val result =
             parserClient.put()
                 .uri("/parser/validate")
@@ -82,6 +78,10 @@ class SnippetService(
                 .toBodilessEntity()
         logger.info("Snippet has status code ${result.statusCode}")
         if (result.statusCode.is2xxSuccessful) {
+            val snippet: Snippet =
+                snippetRepository.save(
+                    Snippet(0, name, language, ownerId, extension, ComplianceEnum.PENDING, user.body!!.name),
+                )
             bucketClient.put()
                 .uri("/v1/asset/{container}/{key}", "snippet", snippet.id)
                 .body(code)

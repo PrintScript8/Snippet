@@ -60,7 +60,6 @@ class SnippetController(
         }
     }
 
-    @Suppress("ReturnCount")
     @PostMapping
     fun createSnippet(
         @RequestBody snippet: MessageSnippet,
@@ -70,7 +69,8 @@ class SnippetController(
         if (!validationService.exists(token)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
         }
-        try {
+
+        return try {
             val id =
                 snippetService.createSnippet(
                     snippet.name,
@@ -80,16 +80,18 @@ class SnippetController(
                     snippet.extension,
                     token,
                 )
+
             permissionClient
                 .put()
                 .uri("/users/snippets/{snippetId}", id)
                 .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toBodilessEntity()
-            return ResponseEntity.status(HttpStatus.CREATED).body(id)
+
+            ResponseEntity.status(HttpStatus.CREATED).body(id)
         } catch (e: InvalidSnippetException) {
             logger.error("Error creating snippet", e)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
         }
     }
 
