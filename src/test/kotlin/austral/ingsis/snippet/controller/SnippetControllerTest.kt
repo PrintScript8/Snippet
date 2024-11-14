@@ -1,191 +1,170 @@
 package austral.ingsis.snippet.controller
 
-import org.mockito.Mockito.times
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import austral.ingsis.snippet.message.RedisMessageEmitter
+import austral.ingsis.snippet.model.CommunicationSnippet
+import austral.ingsis.snippet.model.ComplianceEnum
+import austral.ingsis.snippet.service.AuthService
+import austral.ingsis.snippet.service.SnippetService
+import austral.ingsis.snippet.service.ValidationService
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.mockito.Mockito.`when`
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.header
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 
+@RestClientTest(SnippetController::class)
 class SnippetControllerTest {
-    /*
-    private lateinit var mockMvc: MockMvc
+    @Autowired
+    private lateinit var mockServer: MockRestServiceServer
 
-    @Mock
-    lateinit var snippetService: SnippetService
+    @Autowired
+    private lateinit var snippetController: SnippetController
 
-    @Mock
-    lateinit var permissionClient: RestClient
+    @MockBean
+    private lateinit var snippetService: SnippetService
 
-    @Mock
-    lateinit var clientBuilder: RestClient.Builder
-
-    @Mock
-    private lateinit var responseSpec: RestClient.ResponseSpec
-
-    @Mock
-    private lateinit var requestHeadersUriSpec: RestClient.RequestHeadersUriSpec<*>
-
-    @Mock
-    private lateinit var requestBodyUriSpec: RequestBodyUriSpec
-
-    @Mock
-    private lateinit var requestBodySpec: RestClient.RequestBodySpec
-
-    @Mock
-    private lateinit var requestHeadersSpec: RestClient.RequestHeadersSpec<*>
-
-    @Mock
+    @MockBean
     private lateinit var validationService: ValidationService
 
-    private lateinit var controller: SnippetController
+    @MockBean
+    private lateinit var authService: AuthService
 
-    @BeforeEach
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        `when`(clientBuilder.baseUrl(anyString())).thenReturn(clientBuilder)
-        `when`(clientBuilder.build()).thenReturn(permissionClient)
-        controller = SnippetController(snippetService, clientBuilder, validationService)
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
-    }
+    @MockBean
+    @Suppress("UnusedPrivateProperty")
+    private lateinit var messageEmitter: RedisMessageEmitter
 
     @Test
-    fun `should return snippet by id`() {
-        // Arrange
-        val snippet =
-            CommunicationSnippet(
-                0L,
-                "First Snippet",
-                "PrintScript",
-                1L,
-                "let n:Number = 3",
-                "ps",
-                ComplianceEnum.COMPLIANT
-            )
-        `when`(snippetService.getSnippetById(1)).thenReturn(snippet)
+    fun `test createSnippet`() {
+        val snippet = MessageSnippet("Test Snippet", "Kotlin", "fun main() {}", "kt")
+        val userId = "1L"
+        val snippetId = 0L
+        val request =
+            MockHttpServletRequest().apply {
+                addHeader("Authorization", "123")
+            }
 
-        // Act & Assert
-        mockMvc.perform(get("/snippets/1"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.name").value("First Snippet"))
-
-        verify(snippetService, times(1)).getSnippetById(1)
-    }
-
-    @Test
-    fun `should delete snippet by id`() {
-        // Arrange
-        `when`(snippetService.getSnippetById(1)).thenReturn(
-        CommunicationSnippet(1, "", "", 1, "", "", ComplianceEnum.COMPLIANT))
-        `when`(permissionClient.delete()).thenReturn(requestHeadersUriSpec)
-        `when`(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec)
-        `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
-        doNothing().`when`(snippetService).deleteSnippet(1L)
-
-        // Act & Assert
-        mockMvc.perform(delete("/snippets/1"))
-            .andExpect(status().isOk)
-
-        verify(snippetService, times(1)).deleteSnippet(1)
-    }
-
-    @Test
-    fun `should create snippet successfully`() {
-        // Arrange
-        val snippet =
-            CommunicationSnippet(
-                0L,
-                "First Snippet",
-                "PrintScript",
-                1L,
-                "let n:Number = 3",
-                "ps",
-                ComplianceEnum.COMPLIANT
-            )
-        val id = (snippet.name + snippet.content).hashCode().toLong().absoluteValue
-
-        // Mock service and client behavior
-        doNothing().`when`(snippetService).updateSnippet(
-            id,
-            snippet.content,
-            snippet.language
+        `when`(authService.validateToken("123")).thenReturn("1L")
+        `when`(validationService.exists("123")).thenReturn(true)
+        `when`(
+            snippetService
+                .createSnippet(snippet.name, snippet.content, snippet.language, userId, snippet.extension, userId),
         )
+            .thenReturn(snippetId)
 
-        // Mock chain of calls for RestClient
-        `when`(permissionClient.put()).thenReturn(requestBodyUriSpec)
-        `when`(requestBodyUriSpec.uri("/users/snippets/{id}/{snippetId}", snippet.ownerId, id))
-            .thenReturn(requestBodySpec)
-        `when`(requestBodySpec.retrieve()).thenReturn(responseSpec)
+        mockServer.expect(requestTo("http://permission-service:8080/users/snippets/$snippetId"))
+            .andExpect(method(HttpMethod.PUT))
+            .andExpect(header("Authorization", "123"))
+            .andRespond(withStatus(HttpStatus.OK))
 
-        // Act & Assert
-        mockMvc.perform(
-            post("/snippets")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                    {
-                        "name": "First Snippet",
-                        "description": "First Description",
-                        "code": "First Code",
-                        "language": "First Language",
-                        "ownerId": 1
-                    }
-                    """.trimIndent(),
+        val response = snippetController.createSnippet(snippet, request.getHeader("Authorization")!!)
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(snippetId, response.body)
+    }
+
+    @Test
+    fun `test paginatedSnippets`() {
+        val userId = "1L"
+        val page = 0
+        val pageSize = 10
+        val snippetName = "Test"
+
+        `when`(validationService.exists("123")).thenReturn(true)
+        `when`(validationService.canRead(1L, "123")).thenReturn(true)
+
+        val snippets =
+            listOf(
+                CommunicationSnippet(
+                    1L,
+                    "Test Snippet",
+                    "Kotlin",
+                    userId,
+                    "kt",
+                    "kt",
+                    ComplianceEnum.COMPLIANT,
+                    "Test",
                 ),
-        )
-            .andExpect(status().isCreated)
-            .andExpect(content().string(id.toString()))
+            )
+        `when`(snippetService.paginatedSnippets(page, pageSize, snippetName)).thenReturn(snippets)
 
-        // Verify all interactions
-        verify(snippetService, times(1)).updateSnippet(
-            id,
-            snippet.content,
-            snippet.language
-        )
-        verify(permissionClient, times(1)).put()
-        verify(requestBodyUriSpec, times(1)).uri("/users/snippets/{id}/{snippetId}", snippet.ownerId, id)
-        verify(requestBodySpec, times(1)).retrieve()
+        val request = MockHttpServletRequest()
+        request.addHeader("Authorization", "123")
+
+        val authorizationHeader = request.getHeader("Authorization")!!
+        val response = snippetController.paginatedSnippets(page, pageSize, snippetName, authorizationHeader)
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(PaginationSnippet(page, pageSize, snippets.size, snippets), response.body)
     }
 
     @Test
-    fun `should update snippet`() {
-        // Arrange
+    fun `test setSnippetStatus`() {
+        val userId = "1L"
+        val setStatus = SetStatus(1L, "active")
+
+        `when`(validationService.canModify(setStatus.id, "123")).thenReturn(true)
+
+        val request =
+            MockHttpServletRequest().apply {
+                addHeader("Authorization", "123")
+            }
+
+        val response = snippetController.setSnippetStatus(setStatus, request.getHeader("Authorization")!!)
+        assertEquals(HttpStatus.OK, response.statusCode)
+    }
+
+    @Test
+    fun `test getSnippetById`() {
+        val userId = "1L"
+        val snippetId = 1L
         val snippet =
             CommunicationSnippet(
-                1L,
-                "First Snippet",
-                "PrintScript",
-                1L,
-                "let n:Number = 3",
-                "ps",
-                ComplianceEnum.COMPLIANT
+                snippetId,
+                "Test Snippet",
+                "Kotlin",
+                userId,
+                "kt",
+                "kt",
+                ComplianceEnum.COMPLIANT,
+                "Test",
             )
-        doNothing().`when`(snippetService).updateSnippet(
-            1L,
-            snippet.content,
-            snippet.language
-        )
 
-        // Act & Assert
-        mockMvc.perform(
-            put("/snippets/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                    {
-                        "name": "First Snippet",
-                        "description": "First Description",
-                        "code": "First Code",
-                        "language": "First Language",
-                        "ownerId": 1
-                    }
-                    """.trimIndent(),
-                ),
-        )
-            .andExpect(status().isOk)
+        `when`(validationService.canRead(snippetId, "123")).thenReturn(true)
+        `when`(snippetService.getSnippetById(snippetId)).thenReturn(snippet)
 
-        verify(snippetService, times(1)).updateSnippet(
-            1L,
-            snippet.content,
-            snippet.language
-        )
+        val request =
+            MockHttpServletRequest().apply {
+                addHeader("Authorization", "123")
+            }
+
+        val response = snippetController.getSnippetById(snippetId, request.getHeader("Authorization")!!)
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(snippet, response.body)
     }
-     */
+
+    @Test
+    fun `test updateSnippet`() {
+        val userId = "1L"
+        val snippetId = 1L
+        val content = "Updated content"
+        val language = "Kotlin"
+        val request =
+            MockHttpServletRequest().apply {
+                addHeader("Authorization", "123")
+            }
+
+        `when`(validationService.canModify(snippetId, "123")).thenReturn(true)
+
+        val response =
+            snippetController
+                .updateSnippet(snippetId, Content(content), language, request.getHeader("Authorization")!!)
+        assertEquals(HttpStatus.OK, response.statusCode)
+    }
 }

@@ -11,41 +11,45 @@ class ValidationService(
     private val validationClient = clientBuilder.baseUrl("http://permission-service:8080").build()
 
     fun canModify(
-        userId: Long,
         snippetId: Long,
+        token: String,
     ): Boolean {
-        return exists(userId) &&
+        return exists(token) &&
             validationClient.put()
-                .uri("/validate/edit/{id}/{snippetId}", userId, snippetId)
+                .uri("/validate/edit/{snippetId}", snippetId)
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toEntity(Boolean::class.java).body == true
     }
 
     fun canRead(
-        userId: Long,
         snippetId: Long,
+        token: String,
     ): Boolean {
-        return exists(userId) &&
+        return exists(token) &&
             validationClient.put()
-                .uri("/validate/read/{id}/{snippetId}", userId, snippetId)
+                .uri("/validate/read/{snippetId}", snippetId)
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toEntity(Boolean::class.java).body == true
     }
 
-    fun exists(userId: Long): Boolean {
+    fun exists(token: String): Boolean {
         return validationClient.put()
-            .uri("/validate/create/{id}", userId)
+            .uri("/validate/create")
+            .headers { headers -> headers.set("Authorization", token) }
             .retrieve()
             .toEntity(Boolean::class.java).body == true
     }
 
     fun canDelete(
-        userId: Long,
         snippetId: Long,
+        token: String,
     ): Boolean {
-        return exists(userId) &&
+        return exists(token) &&
             validationClient.put()
-                .uri("/validate/delete/{id}/{snippetId}", userId, snippetId)
+                .uri("/validate/delete/{snippetId}", snippetId)
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toEntity(Boolean::class.java).body == true
     }

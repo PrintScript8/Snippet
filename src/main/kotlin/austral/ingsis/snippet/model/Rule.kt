@@ -26,14 +26,3 @@ data class Rule(
 }
 
 // todo: Agregar to String
-
-/*
-Formmating:
-{ "rules": {
- "spaceBeforeColon": false, "spaceAfterColon": true, "spaceAroundEquals": true, "newlineBeforePrintln": 2 } }
-
-Linting:
-
-{ "identifier_format": "camel case" , "mandatory-variable-or-literal-in-println": "true" }
-
- */

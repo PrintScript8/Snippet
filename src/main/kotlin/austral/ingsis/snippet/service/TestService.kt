@@ -20,7 +20,7 @@ class TestService(
 
     fun createTest(
         snippetId: Long,
-        ownerId: Long,
+        ownerId: String,
         name: String,
         inputs: List<String>,
         outputs: List<String>,
@@ -45,7 +45,7 @@ class TestService(
         return snippetTestRepository.findById(id).get()
     }
 
-    fun getUserTest(id: Long): List<SnippetTest> {
+    fun getUserTest(id: String): List<SnippetTest> {
         return snippetTestRepository.findAllByOwnerId(id)
     }
 
@@ -54,7 +54,9 @@ class TestService(
         name: String,
         input: List<String>,
         output: List<String>,
+        token: String,
     ): Boolean {
+        println(name)
         val snippetId = getTestById(testId).snippetId
         val snippet = snippetRepository.getReferenceById(snippetId)
         snippet.status = ComplianceEnum.PENDING
@@ -65,17 +67,16 @@ class TestService(
                 .retrieve()
                 .body(kotlin.String::class.java)
         if (code == null) {
-            throw NoSuchElementException(
-                "User with ID $snippetId not found",
-            )
+            throw NoSuchElementException("Snippet not found")
         }
         val response: List<String> =
             parserClient.put()
                 .uri("/parser/test/execute")
                 .body(TestRequest(code, "printscript", input))
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toEntity(object : ParameterizedTypeReference<List<String>>() {})
-                .body ?: throw IllegalArgumentException("Failed to parse response of $name")
+                .body ?: error("No response")
 
         if (response == output) {
             snippet.status = ComplianceEnum.COMPLIANT
@@ -87,7 +88,7 @@ class TestService(
     }
 
     fun deleteAllTests(id: Long) {
-        snippetTestRepository.deleteAllByOwnerId(id)
+        snippetTestRepository.deleteAllBySnippetId(id)
     }
 }
 

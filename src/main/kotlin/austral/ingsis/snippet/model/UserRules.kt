@@ -10,10 +10,10 @@ data class UserRules(
     @Id
     @GeneratedValue
     var ruleId: Long,
-    val userId: Long,
+    val userId: String,
     val language: String,
     @ElementCollection
     var allRules: List<Long>,
 ) {
-    constructor() : this(0L, 0L, "", emptyList())
+    constructor() : this(0L, "", "", emptyList())
 }

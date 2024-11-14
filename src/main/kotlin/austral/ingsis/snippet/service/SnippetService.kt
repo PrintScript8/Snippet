@@ -5,11 +5,14 @@ import austral.ingsis.snippet.model.CommunicationSnippet
 import austral.ingsis.snippet.model.ComplianceEnum
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.repository.SnippetRepository
+import jakarta.transaction.InvalidTransactionException
+import jakarta.transaction.Transactional
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.toEntity
 
 @Service
 class SnippetService(
@@ -19,6 +22,7 @@ class SnippetService(
 ) {
     var bucketClient: RestClient = restClientBuilder.baseUrl("http://asset-service:8080").build()
     var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8080").build()
+    var permissionClient: RestClient = restClientBuilder.baseUrl("http://permission-service:8080").build()
     val logger: Logger = LogManager.getLogger(SnippetService::class.java)
 
     fun getSnippetById(id: Long): CommunicationSnippet? {
@@ -41,30 +45,43 @@ class SnippetService(
                 code,
                 snippet.extension,
                 snippet.status,
+                snippet.nickName,
             )
         logger.info("Snippet with id $id has been retrieved")
         return communicationSnippet
     }
 
+    @Suppress("LongParameterList")
     fun createSnippet(
         name: String,
         code: String,
         language: String,
-        ownerId: Long,
+        ownerId: String,
         extension: String,
+        token: String,
     ): Long {
-        val snippet: Snippet =
-            snippetRepository.save(
-                Snippet(0, name, language, ownerId, extension, ComplianceEnum.PENDING),
-            )
+        val user =
+            permissionClient.get()
+                .uri("/users")
+                .headers { headers -> headers.set("Authorization", token) }
+                .retrieve()
+                .toEntity(User::class.java)
+        if (user.body?.name == null) {
+            throw InvalidTransactionException("Invalid user")
+        }
         val result =
             parserClient.put()
                 .uri("/parser/validate")
                 .body(ExecuteSnippet(code, language))
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toBodilessEntity()
         logger.info("Snippet has status code ${result.statusCode}")
         if (result.statusCode.is2xxSuccessful) {
+            val snippet: Snippet =
+                snippetRepository.save(
+                    Snippet(0, name, language, ownerId, extension, ComplianceEnum.PENDING, user.body!!.name),
+                )
             bucketClient.put()
                 .uri("/v1/asset/{container}/{key}", "snippet", snippet.id)
                 .body(code)
@@ -83,6 +100,7 @@ class SnippetService(
         id: Long,
         code: String,
         language: String,
+        token: String,
     ) {
         val snippet: Snippet = snippetRepository.getReferenceById(id)
         snippet.status = ComplianceEnum.PENDING
@@ -91,6 +109,7 @@ class SnippetService(
             parserClient.put()
                 .uri("/parser/validate")
                 .body(ExecuteSnippet(code, language))
+                .headers { headers -> headers.set("Authorization", token) }
                 .retrieve()
                 .toBodilessEntity()
         logger.info("Snippet with id $id has status code ${result.statusCode}")
@@ -101,7 +120,6 @@ class SnippetService(
                 .retrieve()
                 .body(String::class.java)
             logger.info("Snippet with id $id has been updated")
-            snippet.status = ComplianceEnum.COMPLIANT
             snippetRepository.save(snippet)
         } else {
             throw InvalidSnippetException("Invalid snippet")
@@ -141,6 +159,7 @@ class SnippetService(
                     code ?: "",
                     snippet.extension,
                     snippet.status,
+                    snippet.nickName,
                 ),
             )
         }
@@ -154,6 +173,31 @@ class SnippetService(
         }
         return output.subList(fromIndex, toIndex)
     }
+
+    @Transactional
+    fun setSnippetStatus(
+        id: Long,
+        status: String,
+    ) {
+        val translatedStatus =
+            when (status) {
+                "compliant" -> ComplianceEnum.COMPLIANT
+                "pending" -> ComplianceEnum.PENDING
+                "non-compliant" -> ComplianceEnum.NON_COMPLIANT
+                "failed" -> ComplianceEnum.FAILED
+                else -> throw IllegalArgumentException("Invalid status")
+            }
+
+        val snippet: Snippet = snippetRepository.getReferenceById(id)
+        snippet.status = translatedStatus
+
+        // Immediately flush changes to the database to ensure consistency
+        snippetRepository.saveAndFlush(snippet)
+
+        logger.info("Snippet with id $id has been updated to $translatedStatus")
+    }
 }
 
 data class ExecuteSnippet(val code: String, val language: String)
+
+data class User(val id: String, val name: String)

@@ -5,9 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface UserRulesRepository : JpaRepository<UserRules, Long> {
     fun findByUserIdAndLanguage(
-        userId: Long,
+        userId: String,
         language: String,
     ): UserRules?
 
-    fun findByUserId(userId: Long): UserRules?
+    fun findByUserId(userId: String): UserRules?
 }
