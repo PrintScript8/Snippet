@@ -18,5 +18,16 @@ jobs:
     with:
       service_name: ${{ github.ref == 'refs/heads/main' && 'snippet' || 'snippet-dev' }}
 
+  rerun_image:
+    name: Rerun Docker image
+    needs: publish_docker
+    uses: PrintScript8/ingsis-library/.github/workflows/vm-login.yml@main
+    with:
+      service_name: ${{ github.ref == 'refs/heads/main' && 'snippet' || 'snippet-dev' }}
+      port: "8082"
+      is_dev: ${{ github.ref == 'refs/heads/dev' }}
+      is_image: true
+    secrets: inherit
+
 permissions:
   packages: write
