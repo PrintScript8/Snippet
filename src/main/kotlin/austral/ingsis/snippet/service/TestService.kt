@@ -4,6 +4,7 @@ import austral.ingsis.snippet.model.ComplianceEnum
 import austral.ingsis.snippet.model.SnippetTest
 import austral.ingsis.snippet.repository.SnippetRepository
 import austral.ingsis.snippet.repository.SnippetTestRepository
+import austral.ingsis.snippet.server.CorrelationIdInterceptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
@@ -15,8 +16,13 @@ class TestService(
     @Autowired private val snippetRepository: SnippetRepository,
     @Autowired final val restClientBuilder: RestClient.Builder,
 ) {
-    var bucketClient: RestClient = restClientBuilder.baseUrl("http://asset-service:8080").build()
-    var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8080").build()
+    private val interceptor = CorrelationIdInterceptor()
+    var bucketClient: RestClient =
+        restClientBuilder.baseUrl("http://asset-service:8080")
+            .requestInterceptor(interceptor).build()
+    var parserClient: RestClient =
+        restClientBuilder.baseUrl("http://parser-service:8080")
+            .requestInterceptor(interceptor).build()
 
     fun createTest(
         snippetId: Long,

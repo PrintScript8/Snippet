@@ -3,6 +3,7 @@ package austral.ingsis.snippet.controller
 import austral.ingsis.snippet.exception.InvalidSnippetException
 import austral.ingsis.snippet.message.RedisMessageEmitter
 import austral.ingsis.snippet.model.CommunicationSnippet
+import austral.ingsis.snippet.server.CorrelationIdInterceptor
 import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.SnippetService
 import austral.ingsis.snippet.service.ValidationService
@@ -32,7 +33,13 @@ class SnippetController(
     @Autowired private val messageEmitter: RedisMessageEmitter,
     @Autowired private val authService: AuthService,
 ) {
-    private final var permissionClient: RestClient = clientBuilder.baseUrl("http://permission-service:8080").build()
+    private val interceptor = CorrelationIdInterceptor()
+    private final var permissionClient: RestClient =
+        clientBuilder
+            .baseUrl("http://permission-service:8080")
+            .requestInterceptor(interceptor)
+            .build()
+
     private val logger = LogManager.getLogger(SnippetController::class.java)
 
     private fun getIdByToken(token: String): String {

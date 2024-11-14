@@ -35,6 +35,12 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.postgresql:postgresql'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'com.newrelic.agent.java:newrelic-api:8.15.0'
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	testImplementation 'io.projectreactor:reactor-test'
+	implementation 'io.projectreactor.kotlin:reactor-kotlin-extensions'
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor'
+	implementation 'com.newrelic.logging:logback:3.2.0'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation("com.ninja-squad:springmockk:3.1.1")

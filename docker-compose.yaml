@@ -4,10 +4,14 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       - db
     env_file: .env
+    environment:
+      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}
+    volumes:
+      - ./newrelic.yml:/path/inside/container/newrelic.yml
 
   db:
     image: postgres:14

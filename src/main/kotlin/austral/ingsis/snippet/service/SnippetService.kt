@@ -5,6 +5,7 @@ import austral.ingsis.snippet.model.CommunicationSnippet
 import austral.ingsis.snippet.model.ComplianceEnum
 import austral.ingsis.snippet.model.Snippet
 import austral.ingsis.snippet.repository.SnippetRepository
+import austral.ingsis.snippet.server.CorrelationIdInterceptor
 import jakarta.transaction.InvalidTransactionException
 import jakarta.transaction.Transactional
 import org.apache.logging.log4j.LogManager
@@ -20,9 +21,16 @@ class SnippetService(
     @Autowired final val snippetRepository: SnippetRepository,
     @Autowired final val testService: TestService,
 ) {
-    var bucketClient: RestClient = restClientBuilder.baseUrl("http://asset-service:8080").build()
-    var parserClient: RestClient = restClientBuilder.baseUrl("http://parser-service:8080").build()
-    var permissionClient: RestClient = restClientBuilder.baseUrl("http://permission-service:8080").build()
+    private val interceptor = CorrelationIdInterceptor()
+    var bucketClient: RestClient =
+        restClientBuilder.baseUrl("http://asset-service:8080")
+            .requestInterceptor(interceptor).build()
+    var parserClient: RestClient =
+        restClientBuilder.baseUrl("http://parser-service:8080")
+            .requestInterceptor(interceptor).build()
+    var permissionClient: RestClient =
+        restClientBuilder.baseUrl("http://permission-service:8080")
+            .requestInterceptor(interceptor).build()
     val logger: Logger = LogManager.getLogger(SnippetService::class.java)
 
     fun getSnippetById(id: Long): CommunicationSnippet? {

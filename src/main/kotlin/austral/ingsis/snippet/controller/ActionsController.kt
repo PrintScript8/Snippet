@@ -1,5 +1,6 @@
 package austral.ingsis.snippet.controller
 
+import austral.ingsis.snippet.server.CorrelationIdInterceptor
 import austral.ingsis.snippet.service.AuthService
 import austral.ingsis.snippet.service.RulesService
 import org.apache.logging.log4j.LogManager
@@ -22,7 +23,13 @@ class ActionsController(
     @Autowired private val clientBuilder: RestClient.Builder,
     @Autowired private val authService: AuthService,
 ) {
-    private val parserClient = clientBuilder.baseUrl("http://parser-service:8080").build()
+    private val interceptor = CorrelationIdInterceptor()
+    private val parserClient =
+        clientBuilder
+            .baseUrl("http://parser-service:8080")
+            .requestInterceptor(interceptor)
+            .build()
+
     private val logger = LogManager.getLogger(SnippetController::class.java)
 
     private fun getIdByToken(token: String): String {

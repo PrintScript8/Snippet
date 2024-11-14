@@ -1,5 +1,6 @@
 package austral.ingsis.snippet.service
 
+import austral.ingsis.snippet.server.CorrelationIdInterceptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
@@ -8,7 +9,10 @@ import org.springframework.web.client.RestClient
 class ValidationService(
     @Autowired private val clientBuilder: RestClient.Builder,
 ) {
-    private val validationClient = clientBuilder.baseUrl("http://permission-service:8080").build()
+    private val interceptor = CorrelationIdInterceptor()
+    private val validationClient =
+        clientBuilder.baseUrl("http://permission-service:8080")
+            .requestInterceptor(interceptor).build()
 
     fun canModify(
         snippetId: Long,
